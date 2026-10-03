@@ -1,12 +1,15 @@
 import {
   Briefcase,
   CalendarDays,
+  GitBranch,
+  Hourglass,
   ListChecks,
   LogOut,
   NotebookPen,
   Settings,
   Sun,
   TrendingUp,
+  Trophy,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -36,6 +39,9 @@ export const SECTIONS: Section[] = [
     children: [
       { path: '/agency/contacts', label: 'Contacts', icon: Users },
       { path: '/agency/pipeline', label: 'Pipeline', icon: TrendingUp },
+      { path: '/agency/projects', label: 'Projets', icon: GitBranch },
+      { path: '/agency/goals', label: 'Objectifs', icon: Trophy },
+      { path: '/agency/key-dates', label: 'Échéancier', icon: Hourglass },
     ],
   },
   { path: '/notes', label: 'Notes', icon: NotebookPen },

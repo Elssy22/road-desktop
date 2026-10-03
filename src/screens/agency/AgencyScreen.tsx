@@ -2,54 +2,79 @@ import {
   CalendarDays,
   ChevronRight,
   Clock,
+  GitBranch,
+  Hourglass,
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  Trophy,
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Badge, CardNote, CategoryCard, ErrorBanner, Panel, ScreenHeader } from '../../components/ui';
 import { listContacts, type ContactWithLast } from '../../data/crm';
+import { listGoals, type GoalWithProject } from '../../data/goals';
+import { listKeyDates, type KeyDateWithContact } from '../../data/keyDates';
+import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { needsFollowUp } from '../../lib/followUp';
+import { daysUntil, TODAY_ALERT_DAYS } from '../../lib/keyDateAlerts';
 import { formatMoney } from '../../lib/money';
 import { useToday } from '../../lib/useToday';
 import type { Category } from '../../theme/tokens';
 
-const EMPTY: ContactWithLast[] = [];
+type Data = {
+  contacts: ContactWithLast[];
+  projects: ProjectWithProgress[];
+  goals: GoalWithProject[];
+  keyDates: KeyDateWithContact[];
+};
+const EMPTY: Data = { contacts: [], projects: [], goals: [], keyDates: [] };
 
 const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
 
 /** Sections du menu Agence du mobile qui arrivent aux lots suivants du portage. */
-const COMING_SOON = [
-  'Projets · Objectifs · Échéancier (lot 3)',
-  'Finances · Qonto · Coffre · Veille appels d’offres (lot 4)',
-];
+const COMING_SOON = ['Finances · Qonto · Coffre · Veille appels d’offres (lot 4)'];
 
 /**
  * Accueil de la section Agence : portage web de
  * mobile-legacy/src/screens/agency/AgencyScreen.tsx. Une carte par outil, de la
  * teinte de sa catégorie (DECISIONS.md §29), avec un résumé et une alerte.
  */
-export function AgencyScreen() {
+export function AgencyScreen({ userId }: { userId: string }) {
   const today = useToday();
-  const { data: contacts, error } = useRemoteQuery(listContacts, EMPTY);
+  const load = useCallback(async (): Promise<Data> => {
+    const [contacts, projects, { goals }, keyDates] = await Promise.all([
+      listContacts(),
+      listProjects(),
+      listGoals(userId),
+      listKeyDates(),
+    ]);
+    return { contacts, projects, goals, keyDates };
+  }, [userId]);
+  const { data, error } = useRemoteQuery(load, EMPTY);
 
   const summary = useMemo(() => {
+    const { contacts, projects, goals, keyDates } = data;
     // Signés et perdus exclus : ils attendent juste d'être sortis du pipeline.
     const open = contacts.filter((c) => c.pipeline_stage && c.pipeline_stage !== 'signe' && c.pipeline_stage !== 'perdu');
     const potential = Math.round(open.reduce((sum, c) => sum + (c.pipeline_amount ?? 0), 0) * 100) / 100;
+    const upcoming = keyDates.filter((k) => k.date >= today);
     return {
       contacts: contacts.length,
       followUps: contacts.filter((c) => needsFollowUp(c, today)).length,
       prospects: open.length,
       potential,
       lateFollowups: open.filter((c) => c.next_followup_date && c.next_followup_date < today).length,
+      activeProjects: projects.filter((p) => p.status === 'actif').length,
+      openGoals: goals.filter((g) => g.progress < 100).length,
+      upcomingDates: upcoming.length,
+      soonDates: upcoming.filter((k) => daysUntil(k.date, today) <= TODAY_ALERT_DAYS).length,
     };
-  }, [contacts, today]);
+  }, [data, today]);
 
   const sections: {
     to: string;
@@ -78,6 +103,28 @@ export function AgencyScreen() {
             (summary.potential > 0 ? ` · ${formatMoney(summary.potential, 'EUR')} potentiels` : '')
           : 'Prospection : à démarcher, deck envoyé, à relancer…',
       alert: summary.lateFollowups > 0 ? `${summary.lateFollowups} relance${summary.lateFollowups > 1 ? 's' : ''} en retard` : undefined,
+    },
+    {
+      to: '/agency/projects',
+      category: 'projects',
+      icon: GitBranch,
+      title: 'Projets',
+      subtitle: `${summary.activeProjects} projet${summary.activeProjects > 1 ? 's' : ''} actif${summary.activeProjects > 1 ? 's' : ''} · étapes et tâches`,
+    },
+    {
+      to: '/agency/goals',
+      category: 'goals',
+      icon: Trophy,
+      title: 'Objectifs',
+      subtitle: `${plural(summary.openGoals, 'objectif')} en cours`,
+    },
+    {
+      to: '/agency/key-dates',
+      category: 'keyDates',
+      icon: Hourglass,
+      title: 'Échéancier',
+      subtitle: `${plural(summary.upcomingDates, 'échéance')} à venir · contrats clients`,
+      alert: summary.soonDates > 0 ? `${summary.soonDates} sous ${TODAY_ALERT_DAYS} j` : undefined,
     },
     {
       // Sans catégorie : pêche, il produit des tâches.

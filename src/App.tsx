@@ -6,8 +6,14 @@ import { AgencyScreen } from './screens/agency/AgencyScreen';
 import { ContactDetailScreen } from './screens/agency/ContactDetailScreen';
 import { ContactFormScreen } from './screens/agency/ContactFormScreen';
 import { ContactsScreen } from './screens/agency/ContactsScreen';
+import { GoalFormScreen } from './screens/agency/GoalFormScreen';
+import { GoalsScreen } from './screens/agency/GoalsScreen';
+import { KeyDateFormScreen } from './screens/agency/KeyDateFormScreen';
+import { KeyDatesScreen } from './screens/agency/KeyDatesScreen';
 import { MeetingReportScreen } from './screens/agency/MeetingReportScreen';
 import { PipelineScreen } from './screens/agency/PipelineScreen';
+import { ProjectDetailScreen } from './screens/agency/ProjectDetailScreen';
+import { ProjectsScreen } from './screens/agency/ProjectsScreen';
 import { ProspectPurgeScreen } from './screens/agency/ProspectPurgeScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
@@ -30,12 +36,20 @@ function Root() {
           <Route path="/today" element={<TodayScreen userId={session.user.id} />} />
           <Route path="/tasks" element={<TasksScreen />} />
           <Route path="/calendar" element={<CalendarScreen />} />
-          <Route path="/agency" element={<AgencyScreen />} />
+          <Route path="/agency" element={<AgencyScreen userId={session.user.id} />} />
           <Route path="/agency/contacts" element={<ContactsScreen />} />
           <Route path="/agency/contacts/new" element={<ContactFormScreen />} />
           <Route path="/agency/contacts/:id" element={<ContactDetailScreen />} />
           <Route path="/agency/contacts/:id/edit" element={<ContactFormScreen />} />
           <Route path="/agency/pipeline" element={<PipelineScreen />} />
+          <Route path="/agency/projects" element={<ProjectsScreen />} />
+          <Route path="/agency/projects/:id" element={<ProjectDetailScreen />} />
+          <Route path="/agency/goals" element={<GoalsScreen userId={session.user.id} />} />
+          <Route path="/agency/goals/new" element={<GoalFormScreen userId={session.user.id} />} />
+          <Route path="/agency/goals/:id" element={<GoalFormScreen userId={session.user.id} />} />
+          <Route path="/agency/key-dates" element={<KeyDatesScreen />} />
+          <Route path="/agency/key-dates/new" element={<KeyDateFormScreen />} />
+          <Route path="/agency/key-dates/:id" element={<KeyDateFormScreen />} />
           <Route path="/agency/meeting-report" element={<MeetingReportScreen userId={session.user.id} />} />
           <Route path="/agency/prospect-purge" element={<ProspectPurgeScreen />} />
           <Route path="/agency/*" element={<Navigate to="/agency" replace />} />
