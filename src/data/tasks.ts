@@ -1,7 +1,12 @@
-// Tâches : type repris de mobile-legacy/src/db/localDb.ts.
+import { supabase } from '../lib/supabase';
+import { fetchAll, insertRow, softDeleteRow, unwrap, updateRow } from './base';
+
+// Tâches : type et opérations repris de mobile-legacy/src/db/localDb.ts.
 
 /** 0 = normale, 1 = haute, 2 = urgente. */
 export type TaskPriority = 0 | 1 | 2;
+
+export const PRIORITY_LABELS = ['Normale', 'Haute', 'Urgente'] as const;
 
 export type Task = {
   id: string;
@@ -21,3 +26,32 @@ export type Task = {
   updated_at: string;
   deleted_at: string | null;
 };
+
+const TASKS = 'tasks';
+
+/** Toutes les tâches vivantes, les plus récentes d'abord. */
+export const listTasks = (): Promise<Task[]> =>
+  fetchAll<Task>((from, to) =>
+    supabase.from(TASKS).select('*').is('deleted_at', null).order('created_at', { ascending: false }).range(from, to)
+  );
+
+/** Titres des tâches vivantes `ids` (pour les rappels liés). */
+export async function taskTitles(ids: string[]): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const rows = unwrap(
+    await supabase.from(TASKS).select('id, title').in('id', ids).is('deleted_at', null)
+  ) as { id: string; title: string }[];
+  return new Map(rows.map((r) => [r.id, r.title]));
+}
+
+export const addTask = (title: string, dueDate: string | null = null) =>
+  insertRow(TASKS, { title, done: false, due_date: dueDate, priority: 0 });
+
+export const setTaskDone = (task: Task, done: boolean) => updateRow(TASKS, task.id, { done });
+
+export const setTaskDueDate = (task: Task, dueDate: string | null) => updateRow(TASKS, task.id, { due_date: dueDate });
+
+export const setTaskPriority = (task: Task, priority: TaskPriority) => updateRow(TASKS, task.id, { priority });
+
+/** Suppression logique : la ligne reste en base avec deleted_at pour être propagée au mobile. */
+export const softDeleteTask = (task: Task) => softDeleteRow(TASKS, task.id);

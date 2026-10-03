@@ -1,7 +1,21 @@
-import type { BaseRow } from './base';
+import { supabase } from '../lib/supabase';
+import { unwrap, type BaseRow } from './base';
 
 // CRM : types et constantes métier repris de mobile-legacy/src/db/crmDb.ts
 // (tables `contacts` et `interactions`).
+
+/**
+ * Noms des contacts vivants `ids`. Remplace les `LEFT JOIN contacts` du mobile :
+ * pas de clé étrangère vers contacts (DECISIONS.md §5), donc pas d'embarquement PostgREST.
+ */
+export async function contactNames(ids: string[]): Promise<Map<string, string>> {
+  const unique = [...new Set(ids)];
+  if (unique.length === 0) return new Map();
+  const rows = unwrap(
+    await supabase.from('contacts').select('id, name').in('id', unique).is('deleted_at', null)
+  ) as { id: string; name: string }[];
+  return new Map(rows.map((r) => [r.id, r.name]));
+}
 
 export type Contact = BaseRow & {
   name: string;
