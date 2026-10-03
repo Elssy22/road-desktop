@@ -2,7 +2,13 @@ import { makeTheme, type ColorScheme } from './tokens';
 
 // Les jetons de tokens.ts (source unique partagée avec le mobile) deviennent des
 // variables CSS sur <html> : --color-primary, --space-lg, --radius-card…
-// Le mode suit l'apparence de macOS, comme le réglage « Système » du mobile.
+// Par défaut le mode suit l'apparence de macOS ; Réglages › Apparence peut le
+// figer en clair ou en sombre (choix propre à cet ordinateur, non synchronisé).
+
+/** Choix d'apparence de l'utilisateur. */
+export type AppearancePreference = 'system' | ColorScheme;
+
+const PREFERENCE_KEY = 'appearance:scheme';
 
 const kebab = (s: string) => s.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
@@ -24,10 +30,34 @@ function applyTheme(scheme: ColorScheme) {
   root.colorScheme = scheme;
 }
 
+export function getAppearancePreference(): AppearancePreference {
+  try {
+    const value = window.localStorage.getItem(PREFERENCE_KEY);
+    return value === 'light' || value === 'dark' ? value : 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+const systemQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
+
+function sync() {
+  const preference = getAppearancePreference();
+  applyTheme(preference === 'system' ? (systemQuery().matches ? 'dark' : 'light') : preference);
+}
+
+export function setAppearancePreference(preference: AppearancePreference) {
+  try {
+    if (preference === 'system') window.localStorage.removeItem(PREFERENCE_KEY);
+    else window.localStorage.setItem(PREFERENCE_KEY, preference);
+  } catch {
+    // Stockage indisponible : le choix n'est pas retenu, l'apparence système reste appliquée.
+  }
+  sync();
+}
+
 /** Applique le thème courant et le met à jour quand l'apparence système change. */
 export function installThemeVars() {
-  const query = window.matchMedia('(prefers-color-scheme: dark)');
-  const sync = () => applyTheme(query.matches ? 'dark' : 'light');
   sync();
-  query.addEventListener('change', sync);
+  systemQuery().addEventListener('change', sync);
 }

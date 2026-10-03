@@ -1802,6 +1802,21 @@ button {
   flex: none;
 }
 
+/* --- Réglages --- */
+
+/* Pastille d'état de la connexion (verte en ligne, grise hors ligne). */
+.status-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-text-faint);
+}
+
+.status-dot--ok {
+  background: var(--color-success);
+}
+
 /* --- Notes --- */
 
 /* Liste à gauche, éditeur à droite ; empilés sur fenêtre étroite. */

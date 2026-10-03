@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import { parseRecoveryLink } from './auth/recoveryLink';
 import { SessionProvider, useSession } from './auth/SessionProvider';
 import { AppLayout } from './components/AppLayout';
 import { AgencyScreen } from './screens/agency/AgencyScreen';
@@ -24,19 +26,39 @@ import { VeilleSettingsScreen } from './screens/agency/VeilleSettingsScreen';
 import { AppointmentFormScreen } from './screens/AppointmentFormScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
-import { ComingSoonScreen } from './screens/ComingSoonScreen';
 import { NotesScreen } from './screens/NotesScreen';
 import { ReminderFormScreen } from './screens/ReminderFormScreen';
+import { ResetPasswordScreen } from './screens/ResetPasswordScreen';
 import { SearchScreen } from './screens/SearchScreen';
+import { ChangePasswordScreen, SettingsScreen } from './screens/SettingsScreen';
 import { TasksScreen } from './screens/TasksScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { WeeklyReviewScreen } from './screens/WeeklyReviewScreen';
 
 function Root() {
   const { session, ready } = useSession();
+  // Lien « mot de passe oublié » arrivé dans la webview : lu avant le routeur,
+  // qui prendrait le fragment `#access_token=…` pour une route inconnue.
+  const [recovery, setRecovery] = useState(() => parseRecoveryLink(window.location.href));
+  const [authMode, setAuthMode] = useState<'signIn' | 'forgot'>('signIn');
+
   // Rien à afficher tant que la session persistée n'a pas été relue (quelques ms).
   if (!ready) return null;
-  if (!session) return <AuthScreen />;
+  if (recovery.kind !== 'none') {
+    return (
+      <ResetPasswordScreen
+        link={recovery}
+        layout="auth"
+        onFinish={(next) => {
+          // Jetons retirés de l'URL : un rechargement ne rejoue pas le lien.
+          window.history.replaceState(null, '', `${window.location.pathname}#/today`);
+          setAuthMode(next ?? 'signIn');
+          setRecovery({ kind: 'none' });
+        }}
+      />
+    );
+  }
+  if (!session) return <AuthScreen key={authMode} initialMode={authMode} />;
 
   // Routes en hash (#/today) : la webview Tauri sert des fichiers statiques,
   // aucune réécriture d'URL côté serveur n'est nécessaire au rechargement.
@@ -80,7 +102,9 @@ function Root() {
           <Route path="/notes" element={<NotesScreen />} />
           <Route path="/notes/:id" element={<NotesScreen />} />
           <Route path="/notes/*" element={<Navigate to="/notes" replace />} />
-          <Route path="/settings/*" element={<ComingSoonScreen title="Réglages" />} />
+          <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/settings/password" element={<ChangePasswordScreen />} />
+          <Route path="/settings/*" element={<Navigate to="/settings" replace />} />
           <Route path="*" element={<Navigate to="/today" replace />} />
         </Route>
       </Routes>
