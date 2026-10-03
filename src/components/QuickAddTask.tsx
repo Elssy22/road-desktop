@@ -6,17 +6,20 @@ import type { DateKey } from '../lib/dates';
 /**
  * Création rapide : titre + échéance optionnelle (sélecteur de date natif).
  * Avec `fixedDue`, la date est imposée (ex. vue du jour) et le sélecteur n'est
- * pas proposé. Portage web de mobile-legacy/src/components/QuickAddTask.tsx.
+ * pas proposé. Avec `withDue={false}`, simple titre (projet, étape : QuickAddRow
+ * du mobile). Portage web de mobile-legacy/src/components/QuickAddTask.tsx.
  */
 export function QuickAddTask({
   onAdd,
   placeholder = 'Nouvelle tâche',
   fixedDue,
+  withDue = true,
   inputRef,
 }: {
   onAdd: (title: string, due: DateKey | null) => void;
   placeholder?: string;
   fixedDue?: DateKey;
+  withDue?: boolean;
   /** Pour donner le focus au champ depuis un bouton de l'écran (« Nouvelle tâche »). */
   inputRef?: Ref<HTMLInputElement>;
 }) {
@@ -26,7 +29,7 @@ export function QuickAddTask({
   const submit = () => {
     const t = title.trim();
     if (!t) return;
-    onAdd(t, fixedDue ?? (due || null));
+    onAdd(t, withDue ? (fixedDue ?? (due || null)) : null);
     setTitle('');
     setDue('');
   };
@@ -48,7 +51,7 @@ export function QuickAddTask({
         onChange={(e) => setTitle(e.target.value)}
         aria-label={placeholder}
       />
-      {!fixedDue && (
+      {withDue && !fixedDue && (
         <input
           type="date"
           className={due ? 'quick-add__date quick-add__date--set' : 'quick-add__date'}

@@ -1463,3 +1463,139 @@ button {
   justify-content: flex-end;
   gap: var(--space-sm);
 }
+
+/* Liste de choix longue dans une boîte de dialogue (tâche à lier, contact). */
+.dialog__list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+/* --- Projets, objectifs --- */
+
+.progress {
+  height: 6px;
+  overflow: hidden;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-pill);
+}
+
+.progress__fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+}
+
+.progress__fill--done {
+  background: var(--color-success);
+}
+
+/* Ligne d'objectif : titre et pourcentage, montant, barre, méta. */
+.goal-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.goal-row:last-child {
+  border-bottom: none;
+}
+
+.goal-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+}
+
+.goal-row__title {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  color: var(--color-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.goal-row__title:hover {
+  text-decoration: underline;
+}
+
+.goal-row__pct {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.goal-row__pct--done,
+.goal-row__amount--done {
+  color: var(--color-success);
+}
+
+.goal-row__amount {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.goal-row__meta {
+  flex-wrap: wrap;
+  margin-top: 0;
+  gap: var(--space-xs) var(--space-md);
+}
+
+/* Lien vers le projet lié, à l'encre de la catégorie Projets (ciel). */
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tint-sky-fg);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.project-link:hover {
+  text-decoration: underline;
+}
+
+/* Réglage de l'avancement : − barre + */
+.progress-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.progress-stepper .progress {
+  flex: 1;
+}
+
+.progress-stepper .icon-button--round {
+  color: var(--tint-fg);
+  background: var(--tint-icon-bg);
+}
+
+/* Flèches de réordonnancement d'une étape. */
+.row__arrows {
+  display: flex;
+  align-items: center;
+}
+
+.row__arrows .icon-button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.row__arrows .icon-button:disabled:hover {
+  background: none;
+}

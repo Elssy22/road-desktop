@@ -282,6 +282,16 @@ export function FormField({
   );
 }
 
+/** Barre de progression 0–100, verte une fois atteinte (ProgressBar du mobile). */
+export function ProgressBar({ value, label }: { value: number; label?: string }) {
+  const pct = Math.min(100, Math.max(0, value));
+  return (
+    <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={label}>
+      <div className={pct >= 100 ? 'progress__fill progress__fill--done' : 'progress__fill'} style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
 /** Erreur de lecture / d'écriture Supabase, affichée en tête d'écran. */
 export function ErrorBanner({ message }: { message: string | null }) {
   if (!message) return null;
