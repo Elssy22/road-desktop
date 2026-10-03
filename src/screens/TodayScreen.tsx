@@ -147,12 +147,19 @@ function TodayTasks({ today, inputRef }: { today: DateKey; inputRef: RefObject<H
 
 /** Échéances de l'échéancier à J-7 ou moins ; rien n'est affiché s'il n'y en a pas. */
 function UpcomingKeyDates({ today }: { today: DateKey }) {
+  const navigate = useNavigate();
   const load = useCallback(() => listKeyDatesBetween(today, addDays(today, TODAY_ALERT_DAYS)), [today]);
   const { data: keyDates } = useRemoteQuery(load, NO_KEY_DATES);
   if (keyDates.length === 0) return null;
 
   return (
-    <CategoryCard category="keyDates" icon={Hourglass} title="Échéances proches" count={keyDates.length}>
+    <CategoryCard
+      category="keyDates"
+      icon={Hourglass}
+      title="Échéances proches"
+      count={keyDates.length}
+      action={<TextAction label="Échéancier" category="keyDates" onClick={() => navigate('/agency/key-dates')} />}
+    >
       <CardList>
         {keyDates.map((k) => (
           <KeyDateRow key={k.id} keyDate={k} today={today} />
