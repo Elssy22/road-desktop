@@ -1647,3 +1647,46 @@ button {
 .card .notice {
   white-space: pre-line;
 }
+
+/* --- Coffre --- */
+
+.vault-panel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.vault-panel__title svg {
+  color: var(--color-primary);
+}
+
+/* Avertissement « phrase oubliée = documents perdus », à la création du coffre. */
+.vault-warning {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+
+.vault-warning__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+/* Aperçu d'une image déchiffrée (URL blob en mémoire). */
+.vault-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  margin: 0 auto;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
