@@ -12,6 +12,10 @@ function applyTheme(scheme: ColorScheme) {
   for (const [name, value] of Object.entries(theme.colors)) {
     if (typeof value === 'string') root.setProperty(`--color-${kebab(name)}`, value);
   }
+  // Teintes pastel : --tint-peach-bg, --tint-peach-icon-bg… (cf. tintVars, components/ui.tsx).
+  for (const [tint, values] of Object.entries(theme.colors.tints)) {
+    for (const [name, value] of Object.entries(values)) root.setProperty(`--tint-${tint}-${kebab(name)}`, value);
+  }
   for (const [name, value] of Object.entries(theme.spacing)) root.setProperty(`--space-${name}`, `${value}px`);
   for (const [name, value] of Object.entries(theme.radius)) root.setProperty(`--radius-${name}`, `${value}px`);
   root.setProperty('--shadow-card', theme.shadows.card);
