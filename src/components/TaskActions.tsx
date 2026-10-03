@@ -1,5 +1,6 @@
-import { Flag, Trash2, X } from 'lucide-react';
+import { AlarmClock, Flag, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { PRIORITY_LABELS, type Task, type TaskPriority } from '../data/tasks';
 import type { TasksApi } from '../data/useTasks';
@@ -7,11 +8,12 @@ import type { TasksApi } from '../data/useTasks';
 type Actions = Pick<TasksApi, 'setDueDate' | 'setPriority' | 'remove'>;
 
 /**
- * Menu d'une tâche : échéance, priorité, suppression. Portage web de
+ * Menu d'une tâche : échéance, priorité, rappel, suppression. Portage web de
  * mobile-legacy/src/components/TaskActionsSheet.tsx (la feuille du bas devient
- * une boîte de dialogue). « Créer un rappel » arrivera avec le formulaire de rappel.
+ * une boîte de dialogue).
  */
 export function useTaskActions(actions: Actions) {
+  const navigate = useNavigate();
   const [task, setTask] = useState<Task | null>(null);
   const close = () => setTask(null);
 
@@ -26,6 +28,10 @@ export function useTaskActions(actions: Actions) {
       onSetPriority={(p) => {
         void actions.setPriority(task, p);
         close();
+      }}
+      onRemind={() => {
+        close();
+        navigate(`/reminders/new?task=${task.id}`);
       }}
       onRemove={() => {
         void actions.remove(task);
@@ -42,12 +48,14 @@ function TaskActionsDialog({
   onClose,
   onSetDate,
   onSetPriority,
+  onRemind,
   onRemove,
 }: {
   task: Task;
   onClose: () => void;
   onSetDate: (date: string | null) => void;
   onSetPriority: (p: TaskPriority) => void;
+  onRemind: () => void;
   onRemove: () => void;
 }) {
   const [due, setDue] = useState(task.due_date ?? '');
@@ -113,6 +121,10 @@ function TaskActionsDialog({
               Priorité {PRIORITY_LABELS[p].toLowerCase()}
             </button>
           ))}
+          <button type="button" className="dialog__option" onClick={onRemind}>
+            <AlarmClock size={18} />
+            Créer un rappel
+          </button>
           <button type="button" className="dialog__option dialog__option--danger" onClick={onRemove}>
             <Trash2 size={18} />
             Supprimer

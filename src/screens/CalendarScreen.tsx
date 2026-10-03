@@ -1,5 +1,6 @@
-import { AlarmClock, CalendarDays, ChevronLeft, ChevronRight, Hourglass, SquareCheck } from 'lucide-react';
+import { AlarmClock, CalendarDays, ChevronLeft, ChevronRight, Hourglass, Plus, SquareCheck } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { AppointmentRow } from '../components/AppointmentRow';
 import { KeyDateRow } from '../components/KeyDateRow';
@@ -96,6 +97,7 @@ const dot = (category: (typeof LEGEND)[number][0]) => <span className={`dot dot-
  * la grille et le détail du jour sont côte à côte.
  */
 export function CalendarScreen() {
+  const navigate = useNavigate();
   const today = useToday();
   const [mode, setMode] = useState<Mode>('month');
   const [selected, setSelected] = useState<DateKey>(today);
@@ -237,7 +239,23 @@ export function CalendarScreen() {
 
         {/* Détail du jour : une carte par catégorie, de la couleur de son point dans la grille. */}
         <div className="columns__side">
-          <h2 className="day-title">{formatLongDateTitle(selected)}</h2>
+          <div className="day-header">
+            <h2 className="day-title">{formatLongDateTitle(selected)}</h2>
+            <TextAction
+              label="RDV"
+              icon={Plus}
+              category="agenda"
+              title="Nouveau rendez-vous ce jour"
+              onClick={() => navigate(`/appointments/new?date=${selected}`)}
+            />
+            <TextAction
+              label="Rappel"
+              icon={Plus}
+              category="reminders"
+              title="Nouveau rappel ce jour"
+              onClick={() => navigate(`/reminders/new?date=${selected}`)}
+            />
+          </div>
           {empty && (
             <Panel className="panel-card--padded">
               <CardNote>Rien de prévu ce jour-là.</CardNote>

@@ -1,12 +1,13 @@
 import { AlarmClock, CheckCircle2, Circle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { formatTimeOfDay, type ReminderWithLinks } from '../data/reminders';
 import { formatDueLabel, toDateKey, type DateKey } from '../lib/dates';
 
 /**
  * Ligne d'un rappel : case « fait », heure (et jour s'il n'est pas `day`),
- * élément lié. Portage web de mobile-legacy/src/components/ReminderRow.tsx ;
- * la modification du rappel arrivera avec son formulaire.
+ * élément lié ; clic sur le texte : modifier le rappel. Portage web de
+ * mobile-legacy/src/components/ReminderRow.tsx.
  */
 export function ReminderRow({
   reminder,
@@ -20,6 +21,7 @@ export function ReminderRow({
   day?: DateKey;
   onToggle: (reminder: ReminderWithLinks) => void;
 }) {
+  const navigate = useNavigate();
   const at = new Date(reminder.remind_at);
   const reminderDay = toDateKey(at);
   const late = !reminder.done && at < new Date();
@@ -43,7 +45,12 @@ export function ReminderRow({
       >
         {reminder.done ? <CheckCircle2 size={22} /> : <Circle size={22} />}
       </button>
-      <div className="row__main">
+      <button
+        type="button"
+        className="row__main row__button"
+        onClick={() => navigate(`/reminders/${reminder.id}`)}
+        title="Modifier le rappel"
+      >
         <span className={reminder.done ? 'row__title row__title--done' : 'row__title'}>{reminder.title || 'Rappel'}</span>
         <span className="row__meta">
           <span className={late ? 'row__meta-item row__meta-item--danger' : 'row__meta-item'}>
@@ -51,7 +58,7 @@ export function ReminderRow({
             {link ? `${when} · ${link}` : when}
           </span>
         </span>
-      </div>
+      </button>
     </li>
   );
 }

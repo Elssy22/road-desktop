@@ -1,5 +1,6 @@
 import { AlarmClock, CalendarDays, Hourglass, Plus, SquareCheck, Star } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState, type RefObject } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { AppointmentRow } from '../components/AppointmentRow';
 import { KeyDateRow } from '../components/KeyDateRow';
@@ -7,7 +8,7 @@ import { QuickAddTask } from '../components/QuickAddTask';
 import { ReminderRow } from '../components/ReminderRow';
 import { useTaskActions } from '../components/TaskActions';
 import { TaskRow } from '../components/TaskRow';
-import { CardList, CardNote, CategoryCard, ErrorBanner, GradientButton, ScreenHeader } from '../components/ui';
+import { CardList, CardNote, CategoryCard, ErrorBanner, GradientButton, ScreenHeader, TextAction } from '../components/ui';
 import { listAppointmentsBetween, type AppointmentWithContact } from '../data/appointments';
 import { listKeyDatesBetween, type KeyDateWithContact } from '../data/keyDates';
 import { listOpenRemindersUntil, setReminderDone, type ReminderWithLinks } from '../data/reminders';
@@ -66,17 +67,32 @@ export function TodayScreen({ userId }: { userId: string }) {
  * et ne se coche pas. Les RDV passés restent visibles, grisés.
  */
 function TodayAppointments({ today }: { today: DateKey }) {
+  const navigate = useNavigate();
   const load = useCallback(() => listAppointmentsBetween(today, today), [today]);
   const { data: appointments, error } = useRemoteQuery(load, NO_APPOINTMENTS);
 
   return (
-    <CategoryCard category="agenda" icon={CalendarDays} title="Agenda du jour" count={appointments.length}>
+    <CategoryCard
+      category="agenda"
+      icon={CalendarDays}
+      title="Agenda du jour"
+      count={appointments.length}
+      action={
+        <TextAction
+          label="RDV"
+          icon={Plus}
+          category="agenda"
+          title="Nouveau rendez-vous"
+          onClick={() => navigate(`/appointments/new?date=${today}`)}
+        />
+      }
+    >
       {error ? (
         <CardNote tone="danger">{error}</CardNote>
       ) : appointments.length > 0 ? (
         <CardList>
           {appointments.map((a) => (
-            <AppointmentRow key={a.id} appointment={a} />
+            <AppointmentRow key={a.id} appointment={a} showDebrief />
           ))}
         </CardList>
       ) : (
@@ -142,6 +158,7 @@ function UpcomingKeyDates({ today }: { today: DateKey }) {
 
 /** Rappels non faits du jour, et ceux des jours passés restés non faits. */
 function TodayReminders({ today }: { today: DateKey }) {
+  const navigate = useNavigate();
   const load = useCallback(() => listOpenRemindersUntil(today), [today]);
   const { data: reminders, error } = useRemoteQuery(load, NO_REMINDERS);
   const [writeError, setWriteError] = useState<string | null>(null);
@@ -151,7 +168,21 @@ function TodayReminders({ today }: { today: DateKey }) {
       .catch((e: unknown) => setWriteError(e instanceof Error ? e.message : String(e)));
 
   return (
-    <CategoryCard category="reminders" icon={AlarmClock} title="Rappels" count={reminders.length}>
+    <CategoryCard
+      category="reminders"
+      icon={AlarmClock}
+      title="Rappels"
+      count={reminders.length}
+      action={
+        <TextAction
+          label="Rappel"
+          icon={Plus}
+          category="reminders"
+          title="Nouveau rappel"
+          onClick={() => navigate(`/reminders/new?date=${today}`)}
+        />
+      }
+    >
       <ErrorBanner message={writeError ?? error} />
       {reminders.length > 0 ? (
         <CardList>

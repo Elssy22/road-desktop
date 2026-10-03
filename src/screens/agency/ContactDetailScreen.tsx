@@ -9,6 +9,7 @@ import {
   MessagesSquare,
   Pencil,
   Phone,
+  Plus,
   Presentation,
   Repeat,
   Shirt,
@@ -250,7 +251,21 @@ export function ContactDetailScreen() {
         </div>
 
         <div className="columns__side">
-          <CategoryCard category="reminders" icon={AlarmClock} title="Rappels" count={reminders.length}>
+          <CategoryCard
+            category="reminders"
+            icon={AlarmClock}
+            title="Rappels"
+            count={reminders.length}
+            action={
+              <TextAction
+                label="Rappel"
+                icon={Plus}
+                category="reminders"
+                title="Nouveau rappel pour ce contact"
+                onClick={() => navigate(`/reminders/new?contact=${contact.id}`)}
+              />
+            }
+          >
             {reminders.length > 0 ? (
               <CardList>
                 {reminders.map((r) => (
