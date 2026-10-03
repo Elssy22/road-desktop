@@ -35,7 +35,7 @@ function resetErrorMessage(error: unknown): string {
 }
 
 /** Équivalent web de AuthLayout : surtitre « Road », grand titre, carte centrale. */
-function AuthLayout({ title, children }: { title: string; children: ReactNode }) {
+export function AuthLayout({ title, children }: { title: string; children: ReactNode }) {
   return (
     <main className="auth">
       <div className="auth__inner">
@@ -51,9 +51,9 @@ function AuthLayout({ title, children }: { title: string; children: ReactNode })
  * Connexion email / mot de passe : même compte Supabase que le mobile, donc
  * même auth.uid() et mêmes données via la RLS.
  */
-export function AuthScreen() {
+export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' | 'forgot' }) {
   const { error: sessionError } = useSession();
-  const [mode, setMode] = useState<'signIn' | 'forgot'>('signIn');
+  const [mode, setMode] = useState<'signIn' | 'forgot'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
