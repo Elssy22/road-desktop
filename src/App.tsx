@@ -2,6 +2,13 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { SessionProvider, useSession } from './auth/SessionProvider';
 import { AppLayout } from './components/AppLayout';
+import { AgencyScreen } from './screens/agency/AgencyScreen';
+import { ContactDetailScreen } from './screens/agency/ContactDetailScreen';
+import { ContactFormScreen } from './screens/agency/ContactFormScreen';
+import { ContactsScreen } from './screens/agency/ContactsScreen';
+import { MeetingReportScreen } from './screens/agency/MeetingReportScreen';
+import { PipelineScreen } from './screens/agency/PipelineScreen';
+import { ProspectPurgeScreen } from './screens/agency/ProspectPurgeScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
 import { ComingSoonScreen } from './screens/ComingSoonScreen';
@@ -23,7 +30,15 @@ function Root() {
           <Route path="/today" element={<TodayScreen userId={session.user.id} />} />
           <Route path="/tasks" element={<TasksScreen />} />
           <Route path="/calendar" element={<CalendarScreen />} />
-          <Route path="/agency/*" element={<ComingSoonScreen title="Agence" />} />
+          <Route path="/agency" element={<AgencyScreen />} />
+          <Route path="/agency/contacts" element={<ContactsScreen />} />
+          <Route path="/agency/contacts/new" element={<ContactFormScreen />} />
+          <Route path="/agency/contacts/:id" element={<ContactDetailScreen />} />
+          <Route path="/agency/contacts/:id/edit" element={<ContactFormScreen />} />
+          <Route path="/agency/pipeline" element={<PipelineScreen />} />
+          <Route path="/agency/meeting-report" element={<MeetingReportScreen userId={session.user.id} />} />
+          <Route path="/agency/prospect-purge" element={<ProspectPurgeScreen />} />
+          <Route path="/agency/*" element={<Navigate to="/agency" replace />} />
           <Route path="/notes/*" element={<ComingSoonScreen title="Notes" />} />
           <Route path="/settings/*" element={<ComingSoonScreen title="Réglages" />} />
           <Route path="*" element={<Navigate to="/today" replace />} />
