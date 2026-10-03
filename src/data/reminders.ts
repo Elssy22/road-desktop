@@ -75,6 +75,22 @@ export async function listOpenRemindersUntil(day: DateKey): Promise<ReminderWith
   return withLinks(rows);
 }
 
+/** Fiche contact : rappels non faits liés au contact, par instant. */
+export async function listOpenRemindersForContact(contactId: string): Promise<ReminderWithLinks[]> {
+  const rows = await fetchAll<Reminder>((a, b) =>
+    supabase
+      .from(REMINDERS)
+      .select('*')
+      .is('deleted_at', null)
+      .eq('done', false)
+      .eq('contact_id', contactId)
+      .order('remind_at')
+      .order('created_at')
+      .range(a, b)
+  );
+  return withLinks(rows);
+}
+
 export const setReminderDone = (reminder: Reminder, done: boolean) => updateRow(REMINDERS, reminder.id, { done });
 
 /** « 14:05 » (heure locale). */
