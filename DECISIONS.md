@@ -1743,3 +1743,34 @@ Road calcule **en local, à l'affichage**, sans rien écrire.
    (sinon seule la sync des objectifs échoue ; l'outbox est conservée).
 2. Aucune Edge Function à déployer, aucun secret. Aucune dépendance, `app.json` inchangé →
    `eas update` suffit, pas de nouveau build.
+
+## 35. Desktop Mac — scaffold Tauri (abandon de Mac Catalyst)
+
+Mac Catalyst abandonné après audit : bug confirmé de Xcode 27 sur la validation
+`MACOSX_DEPLOYMENT_TARGET` des cibles Pods (reproductible même en forçant la valeur en ligne
+de commande avec `xcodebuild`, donc indépendant de notre configuration). Xcode 26.6
+(recommandé par Expo pour SDK 57) n'est pas installable sur la version de macOS de la machine.
+
+**Choix : Tauri** (coquille native Rust + webview système macOS + frontend web React/Vite).
+Évite entièrement Xcode/CocoaPods pour la version Mac. Nouveau dossier séparé
+`road-desktop-tauri`, copie initiale de l'app mobile, sans toucher au projet mobile d'origine.
+
+- Frontend web : Vite + React + TypeScript (pas Next.js — Tauri embarque un frontend statique,
+  pas besoin de serveur).
+- Ancien code React Native rangé dans `mobile-legacy/` (référence, pas supprimé) ; code métier
+  pur (hors composants RN) réimporté dans `src/` sans réécriture de la logique.
+- Identifiant bundle desktop : `com.regista.road.desktop` (distinct du mobile
+  `com.regista.road`, pour ne jamais confondre les deux apps même installées côte à côte).
+- **Pas de cache SQLite local pour cette version desktop** : connexion directe à Supabase
+  (`src/data/*.ts`). Raison : le Mac est une machine fixe, généralement en ligne ; la logique
+  offline-first du mobile (utile en déplacement, mauvais réseau) n'apporte pas grand-chose ici
+  et complexifierait le scaffold initial. Du offline pourra être ajouté plus tard si un besoin
+  réel apparaît (ex. coupures réseau fréquentes constatées à l'usage).
+- Variables d'environnement : préfixe `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` dans
+  `.env.local` (Vite exige ce préfixe pour exposer une variable au code client ; remplace
+  `EXPO_PUBLIC_SUPABASE_*` utilisé côté mobile). Fichier toujours ignoré par git.
+- Étape 1 (ce scaffold) : auth Supabase (email/mot de passe) + écran provisoire "Connecté :
+  {email}". Les 28 écrans réels arrivent aux étapes suivantes, lot par lot comme pour le mobile.
+- Build web vérifié (`npm run build`, `tsc --noEmit` propres). La coquille Tauri elle-même
+  (Rust/`cargo tauri dev`) n'a pas pu être testée depuis le bac à sable Linux de l'assistant
+  (pas de toolchain Rust) — premier test réel à faire sur le Mac de Landry.
