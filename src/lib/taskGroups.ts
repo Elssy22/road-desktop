@@ -1,4 +1,4 @@
-import type { Task } from '../db/localDb';
+import type { Task } from '../data/tasks';
 import type { DateKey } from './dates';
 
 export type TaskGroupKey = 'overdue' | 'today' | 'upcoming' | 'nodate' | 'done';

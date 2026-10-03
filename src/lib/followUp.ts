@@ -1,4 +1,4 @@
-import type { ContactWithLast } from '../db/crmDb';
+import type { ContactWithLast } from '../data/crm';
 import { daysBetween, toDateKey, type DateKey } from './dates';
 
 /** Au-delà de ce nombre de jours sans interaction, le contact est « à relancer ». */

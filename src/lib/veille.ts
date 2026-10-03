@@ -4,7 +4,7 @@
 // Les réglages (mots-clés) sont lus et écrits en ligne, comme Qonto.
 import { FunctionsHttpError } from '@supabase/supabase-js';
 
-import type { TenderOffer, TenderStatus } from '../db/tenderOffersDb';
+import type { TenderOffer, TenderStatus } from '../data/tenderOffers';
 import { daysBetween, formatDueLabel, toDateKey, type DateKey } from './dates';
 import { supabase } from './supabase';
 
