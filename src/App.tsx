@@ -4,6 +4,7 @@ import { SessionProvider, useSession } from './auth/SessionProvider';
 import { AppLayout } from './components/AppLayout';
 import { AuthScreen } from './screens/AuthScreen';
 import { ComingSoonScreen } from './screens/ComingSoonScreen';
+import { TasksScreen } from './screens/TasksScreen';
 import { TodayScreen } from './screens/TodayScreen';
 
 function Root() {
@@ -19,7 +20,7 @@ function Root() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/today" element={<TodayScreen userId={session.user.id} />} />
-          <Route path="/tasks" element={<ComingSoonScreen title="Tâches" />} />
+          <Route path="/tasks" element={<TasksScreen />} />
           <Route path="/calendar" element={<ComingSoonScreen title="Calendrier" />} />
           <Route path="/agency/*" element={<ComingSoonScreen title="Agence" />} />
           <Route path="/notes/*" element={<ComingSoonScreen title="Notes" />} />
