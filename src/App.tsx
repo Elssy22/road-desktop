@@ -4,6 +4,7 @@ import { SessionProvider, useSession } from './auth/SessionProvider';
 import { AppLayout } from './components/AppLayout';
 import { AuthScreen } from './screens/AuthScreen';
 import { ComingSoonScreen } from './screens/ComingSoonScreen';
+import { TodayScreen } from './screens/TodayScreen';
 
 function Root() {
   const { session, ready } = useSession();
@@ -17,7 +18,7 @@ function Root() {
     <HashRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route path="/today" element={<ComingSoonScreen title="Aujourd'hui" />} />
+          <Route path="/today" element={<TodayScreen userId={session.user.id} />} />
           <Route path="/tasks" element={<ComingSoonScreen title="Tâches" />} />
           <Route path="/calendar" element={<ComingSoonScreen title="Calendrier" />} />
           <Route path="/agency/*" element={<ComingSoonScreen title="Agence" />} />
