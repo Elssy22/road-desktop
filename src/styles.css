@@ -1724,6 +1724,38 @@ button {
   background: var(--color-surface);
 }
 
+/* --- Rendez-vous --- */
+
+/* Attribution obligatoire sous les suggestions Nominatim. */
+.address-attribution {
+  flex: 1;
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.toolbar a.text-action {
+  text-decoration: none;
+}
+
+/* Titre du jour sélectionné du calendrier, avec ses ajouts rapides. */
+.day-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.day-header .day-title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Raccourci vers le compte-rendu d'un RDV passé. */
+.icon-button--primary {
+  color: var(--color-primary);
+}
+
 /* --- Notes --- */
 
 /* Liste à gauche, éditeur à droite ; empilés sur fenêtre étroite. */

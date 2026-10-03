@@ -21,10 +21,12 @@ import { VaultDocumentScreen } from './screens/agency/VaultDocumentScreen';
 import { VaultScreen } from './screens/agency/VaultScreen';
 import { VeilleScreen } from './screens/agency/VeilleScreen';
 import { VeilleSettingsScreen } from './screens/agency/VeilleSettingsScreen';
+import { AppointmentFormScreen } from './screens/AppointmentFormScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
 import { ComingSoonScreen } from './screens/ComingSoonScreen';
 import { NotesScreen } from './screens/NotesScreen';
+import { ReminderFormScreen } from './screens/ReminderFormScreen';
 import { TasksScreen } from './screens/TasksScreen';
 import { TodayScreen } from './screens/TodayScreen';
 
@@ -67,6 +69,10 @@ function Root() {
           <Route path="/agency/meeting-report" element={<MeetingReportScreen userId={session.user.id} />} />
           <Route path="/agency/prospect-purge" element={<ProspectPurgeScreen />} />
           <Route path="/agency/*" element={<Navigate to="/agency" replace />} />
+          <Route path="/appointments/new" element={<AppointmentFormScreen />} />
+          <Route path="/appointments/:id" element={<AppointmentFormScreen />} />
+          <Route path="/reminders/new" element={<ReminderFormScreen />} />
+          <Route path="/reminders/:id" element={<ReminderFormScreen />} />
           <Route path="/notes" element={<NotesScreen />} />
           <Route path="/notes/:id" element={<NotesScreen />} />
           <Route path="/notes/*" element={<Navigate to="/notes" replace />} />
