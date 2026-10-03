@@ -1,29 +1,34 @@
 import {
   CalendarDays,
   ChevronRight,
-  Clock,
   GitBranch,
   Hourglass,
+  Lock,
+  Search,
   ShieldCheck,
   Sparkles,
   TrendingUp,
   Trophy,
   Users,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Badge, CardNote, CategoryCard, ErrorBanner, Panel, ScreenHeader } from '../../components/ui';
+import { Badge, CardNote, CategoryCard, ErrorBanner, ScreenHeader } from '../../components/ui';
 import { listContacts, type ContactWithLast } from '../../data/crm';
 import { listGoals, type GoalWithProject } from '../../data/goals';
 import { listKeyDates, type KeyDateWithContact } from '../../data/keyDates';
+import { effectiveStatus, listMoneyItems, type MoneyItemWithLinks } from '../../data/money';
 import { listProjects, type ProjectWithProgress } from '../../data/projects';
+import { listTenderOffers, type TenderOffer } from '../../data/tenderOffers';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { needsFollowUp } from '../../lib/followUp';
 import { daysUntil, TODAY_ALERT_DAYS } from '../../lib/keyDateAlerts';
 import { formatMoney } from '../../lib/money';
 import { useToday } from '../../lib/useToday';
+import { isUrgent } from '../../lib/veille';
 import type { Category } from '../../theme/tokens';
 
 type Data = {
@@ -31,13 +36,12 @@ type Data = {
   projects: ProjectWithProgress[];
   goals: GoalWithProject[];
   keyDates: KeyDateWithContact[];
+  money: MoneyItemWithLinks[];
+  tenders: TenderOffer[];
 };
-const EMPTY: Data = { contacts: [], projects: [], goals: [], keyDates: [] };
+const EMPTY: Data = { contacts: [], projects: [], goals: [], keyDates: [], money: [], tenders: [] };
 
 const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
-
-/** Sections du menu Agence du mobile qui arrivent aux lots suivants du portage. */
-const COMING_SOON = ['Finances · Qonto · Coffre · Veille appels d’offres (lot 4)'];
 
 /**
  * Accueil de la section Agence : portage web de
@@ -47,18 +51,21 @@ const COMING_SOON = ['Finances · Qonto · Coffre · Veille appels d’offres (l
 export function AgencyScreen({ userId }: { userId: string }) {
   const today = useToday();
   const load = useCallback(async (): Promise<Data> => {
-    const [contacts, projects, { goals }, keyDates] = await Promise.all([
+    const [contacts, projects, { goals }, keyDates, money, tenders] = await Promise.all([
       listContacts(),
       listProjects(),
       listGoals(userId),
       listKeyDates(),
+      listMoneyItems(),
+      listTenderOffers(),
     ]);
-    return { contacts, projects, goals, keyDates };
+    return { contacts, projects, goals, keyDates, money, tenders };
   }, [userId]);
   const { data, error } = useRemoteQuery(load, EMPTY);
 
   const summary = useMemo(() => {
-    const { contacts, projects, goals, keyDates } = data;
+    const { contacts, projects, goals, keyDates, money, tenders } = data;
+    const unpaid = money.map((m) => effectiveStatus(m, today)).filter((s) => s !== 'payé');
     // Signés et perdus exclus : ils attendent juste d'être sortis du pipeline.
     const open = contacts.filter((c) => c.pipeline_stage && c.pipeline_stage !== 'signe' && c.pipeline_stage !== 'perdu');
     const potential = Math.round(open.reduce((sum, c) => sum + (c.pipeline_amount ?? 0), 0) * 100) / 100;
@@ -73,6 +80,11 @@ export function AgencyScreen({ userId }: { userId: string }) {
       openGoals: goals.filter((g) => g.progress < 100).length,
       upcomingDates: upcoming.length,
       soonDates: upcoming.filter((k) => daysUntil(k.date, today) <= TODAY_ALERT_DAYS).length,
+      pendingMoney: unpaid.length,
+      lateMoney: unpaid.filter((s) => s === 'en_retard').length,
+      newTenders: tenders.filter((t) => t.status === 'nouveau').length,
+      // Ignorés et candidatures envoyées exclus (isUrgent).
+      urgentTenders: tenders.filter((t) => isUrgent(t, today)).length,
     };
   }, [data, today]);
 
@@ -105,6 +117,17 @@ export function AgencyScreen({ userId }: { userId: string }) {
       alert: summary.lateFollowups > 0 ? `${summary.lateFollowups} relance${summary.lateFollowups > 1 ? 's' : ''} en retard` : undefined,
     },
     {
+      to: '/agency/veille',
+      category: 'veille',
+      icon: Search,
+      title: 'Veille appels d’offres',
+      subtitle:
+        summary.newTenders > 0
+          ? `${summary.newTenders} nouvel${summary.newTenders > 1 ? 's' : ''} avis · BOAMP`
+          : 'Marchés publics sport et communication · BOAMP',
+      alert: summary.urgentTenders > 0 ? `${summary.urgentTenders} urgent${summary.urgentTenders > 1 ? 's' : ''}` : undefined,
+    },
+    {
       to: '/agency/projects',
       category: 'projects',
       icon: GitBranch,
@@ -127,12 +150,28 @@ export function AgencyScreen({ userId }: { userId: string }) {
       alert: summary.soonDates > 0 ? `${summary.soonDates} sous ${TODAY_ALERT_DAYS} j` : undefined,
     },
     {
+      to: '/agency/money',
+      category: 'finance',
+      icon: Wallet,
+      title: 'Finances',
+      subtitle: `${summary.pendingMoney} ligne${summary.pendingMoney > 1 ? 's' : ''} à encaisser · commissions, factures, Qonto`,
+      alert: summary.lateMoney > 0 ? `${summary.lateMoney} en retard` : undefined,
+    },
+    {
       // Sans catégorie : pêche, il produit des tâches.
       to: '/agency/meeting-report',
       category: 'tasks',
       icon: Sparkles,
       title: 'Compte-rendu de RDV',
       subtitle: 'Notes → résumé et tâches (IA)',
+    },
+    {
+      // Sans catégorie : menthe, comme la carte Sécurité des Réglages du mobile.
+      to: '/agency/vault',
+      category: 'reminders',
+      icon: Lock,
+      title: 'Coffre',
+      subtitle: 'Documents chiffrés · contrats, pièces',
     },
     {
       to: '/calendar',
@@ -174,16 +213,6 @@ export function AgencyScreen({ userId }: { userId: string }) {
           </Link>
         ))}
       </div>
-      <Panel className="panel-card--padded coming-soon">
-        <p className="coming-soon__title">
-          <Clock size={16} />
-          Bientôt sur Mac
-        </p>
-        {COMING_SOON.map((line) => (
-          <CardNote key={line}>{line}</CardNote>
-        ))}
-        <CardNote>En attendant, ces sections restent disponibles sur le mobile.</CardNote>
-      </Panel>
     </div>
   );
 }

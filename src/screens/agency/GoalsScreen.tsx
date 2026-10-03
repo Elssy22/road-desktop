@@ -1,6 +1,6 @@
 import { GitBranch, Plus, RefreshCw, Trophy } from 'lucide-react';
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import {
   CardList,
@@ -66,15 +66,14 @@ function QontoNote({ qonto }: { qonto: QontoReceipts | null }) {
     return (
       <CardNote tone="danger">
         Encaissements Qonto illisibles pour l’instant{qonto?.error ? ` (${qonto.error})` : ''} : les objectifs de
-        chiffre d’affaires s’afficheront dès qu’ils seront lisibles. La synchronisation Qonto arrive sur Mac avec la
-        section Finances.
+        chiffre d’affaires s’afficheront dès qu’ils seront lisibles.
       </CardNote>
     );
   }
   return (
     <CardNote>
       Chiffre d’affaires calculé depuis les encaissements Qonto déjà importés. Pour les mettre à jour, lance
-      « Synchroniser » dans Finances › Depuis Qonto sur le mobile (bientôt sur Mac).
+      « Synchroniser » dans <Link to="/agency/money">Finances › Depuis Qonto</Link>.
     </CardNote>
   );
 }
