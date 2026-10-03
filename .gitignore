@@ -1,43 +1,44 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
 # dependencies
 node_modules/
 
-# Expo
-.expo/
+# Vite (frontend web)
 dist/
+dist-ssr/
+
+# Tauri / Cargo (src-tauri/.gitignore couvre aussi target/ et gen/schemas)
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Expo (restes de l'app mobile, cf. mobile-legacy/)
+.expo/
 web-build/
 expo-env.d.ts
 
-# Native
-.kotlin/
-*.orig.*
+# Signing keys
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.pem
 
-# Metro
-.metro-health-check*
-
-# debug
+# logs / debug
+*.log
 npm-debug.*
-yarn-debug.*
-yarn-error.*
 
 # macOS
 .DS_Store
-*.pem
 
-# local env files
+# local env files (VITE_SUPABASE_* : cf. .env.example)
 .env*.local
 
 # typescript
 *.tsbuildinfo
 
-# generated native folders
-/ios
-/android
+# editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# outils locaux
 claude_*.json
-expo_dev_server*.log
