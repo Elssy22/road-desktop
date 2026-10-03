@@ -16,11 +16,12 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react';
-import { useState } from 'react';
-import { matchPath, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { matchPath, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useSession } from '../auth/SessionProvider';
 import { supabase } from '../lib/supabase';
+import { SearchField } from './SearchField';
 
 type Section = {
   path: string;
@@ -54,6 +55,42 @@ export const SECTIONS: Section[] = [
   { path: '/settings', label: 'Réglages', icon: Settings },
 ];
 
+/**
+ * Recherche globale (SearchScreen du mobile) : sur desktop, un champ toujours
+ * visible en tête de barre latérale, focalisé par ⌘K. La saisie mène à
+ * `/search?q=…` ; la requête vit dans l'URL, le champ la reflète.
+ */
+function SidebarSearch() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [params] = useSearchParams();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const onSearch = pathname === '/search';
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  return (
+    <SearchField
+      className="sidebar__search"
+      inputRef={inputRef}
+      value={onSearch ? (params.get('q') ?? '') : ''}
+      // Première frappe : nouvel écran dans l'historique ; les suivantes le remplacent.
+      onChange={(q) => navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search', { replace: onSearch })}
+      placeholder="Rechercher (⌘K)"
+    />
+  );
+}
+
 const linkClass = (active: boolean, sub = false) =>
   ['nav-link', sub && 'nav-link--sub', active && 'nav-link--active'].filter(Boolean).join(' ');
 
@@ -73,6 +110,7 @@ export function AppLayout() {
     <div className="shell">
       <nav className="sidebar" aria-label="Navigation principale">
         <p className="sidebar__brand eyebrow">Road</p>
+        <SidebarSearch />
         <ul className="sidebar__list">
           {SECTIONS.map(({ path, label, icon: Icon, children }) => {
             // Une seule entrée en surbrillance : le sous-menu qui correspond, sinon la section.

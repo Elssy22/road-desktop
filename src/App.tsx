@@ -27,6 +27,7 @@ import { CalendarScreen } from './screens/CalendarScreen';
 import { ComingSoonScreen } from './screens/ComingSoonScreen';
 import { NotesScreen } from './screens/NotesScreen';
 import { ReminderFormScreen } from './screens/ReminderFormScreen';
+import { SearchScreen } from './screens/SearchScreen';
 import { TasksScreen } from './screens/TasksScreen';
 import { TodayScreen } from './screens/TodayScreen';
 
@@ -73,6 +74,7 @@ function Root() {
           <Route path="/appointments/:id" element={<AppointmentFormScreen />} />
           <Route path="/reminders/new" element={<ReminderFormScreen />} />
           <Route path="/reminders/:id" element={<ReminderFormScreen />} />
+          <Route path="/search" element={<SearchScreen />} />
           <Route path="/notes" element={<NotesScreen />} />
           <Route path="/notes/:id" element={<NotesScreen />} />
           <Route path="/notes/*" element={<Navigate to="/notes" replace />} />

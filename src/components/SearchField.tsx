@@ -1,19 +1,26 @@
 import { Search, X } from 'lucide-react';
+import type { Ref } from 'react';
 
 /** Champ de recherche d'une liste (portage web de la barre de ListToolbar du mobile). */
 export function SearchField({
   value,
   onChange,
   placeholder,
+  inputRef,
+  className,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
+  /** Pour donner le focus au champ depuis un raccourci clavier (recherche globale). */
+  inputRef?: Ref<HTMLInputElement>;
+  className?: string;
 }) {
   return (
-    <div className="search-field">
+    <div className={className ? `search-field ${className}` : 'search-field'}>
       <Search size={18} className="search-field__icon" aria-hidden />
       <input
+        ref={inputRef}
         type="search"
         className="search-field__input"
         value={value}

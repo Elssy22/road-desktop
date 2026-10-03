@@ -173,6 +173,15 @@ button {
   padding: 0 var(--space-md);
 }
 
+/* Recherche globale : le champ tient dans la largeur de la barre latérale. */
+.sidebar__search {
+  flex: none;
+  min-width: 0;
+  min-height: 36px;
+  margin-top: calc(-1 * var(--space-md));
+  font-size: 14px;
+}
+
 .sidebar__list {
   display: flex;
   flex-direction: column;
