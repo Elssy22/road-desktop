@@ -1599,3 +1599,51 @@ button {
 .row__arrows .icon-button:disabled:hover {
   background: none;
 }
+
+/* --- Finances, Qonto --- */
+
+/* Montant aligné à droite d'une ligne (finances, Qonto). */
+.row__amount {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* Encaissement Qonto (transaction créditrice). */
+.row__amount--credit {
+  color: var(--color-success);
+}
+
+/* Groupe de lignes Qonto dans la carte « Depuis Qonto » : titre, total, liste. */
+.qonto-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.qonto-group__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.qonto-group__title {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.qonto-group__title--danger {
+  color: var(--color-danger);
+}
+
+.qonto-group__title--success {
+  color: var(--color-success);
+}
+
+/* Compte rendu d'import sur plusieurs lignes (une erreur par type). */
+.card .notice {
+  white-space: pre-line;
+}
