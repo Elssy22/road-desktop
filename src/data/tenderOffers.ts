@@ -1,4 +1,5 @@
-import type { BaseRow } from './base';
+import { supabase } from '../lib/supabase';
+import { fetchAll, updateRow, type BaseRow } from './base';
 
 // Veille BOAMP : types et constantes repris de mobile-legacy/src/db/tenderOffersDb.ts.
 // Avis importés côté serveur par l'Edge Function boamp-sync. L'app ne crée
@@ -31,3 +32,23 @@ export type TenderOffer = BaseRow & {
   url: string | null;
   status: TenderStatus;
 };
+
+const TENDER_OFFERS = 'tender_offers';
+
+/** Tous les avis, par date limite (les plus proches d'abord, sans date à la fin). */
+export async function listTenderOffers(): Promise<TenderOffer[]> {
+  const rows = await fetchAll<TenderOffer>((from, to) =>
+    supabase
+      .from(TENDER_OFFERS)
+      .select('*')
+      .is('deleted_at', null)
+      .order('deadline_at', { nullsFirst: false })
+      .order('published_on', { ascending: false })
+      .order('id')
+      .range(from, to)
+  );
+  // text[] Postgres : déjà un tableau, sauf colonne nulle.
+  return rows.map((r) => ({ ...r, categories: r.categories ?? [] }));
+}
+
+export const setTenderStatus = (id: string, status: TenderStatus) => updateRow(TENDER_OFFERS, id, { status });
