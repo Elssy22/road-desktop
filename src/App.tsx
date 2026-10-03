@@ -24,6 +24,7 @@ import { VeilleSettingsScreen } from './screens/agency/VeilleSettingsScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
 import { ComingSoonScreen } from './screens/ComingSoonScreen';
+import { NotesScreen } from './screens/NotesScreen';
 import { TasksScreen } from './screens/TasksScreen';
 import { TodayScreen } from './screens/TodayScreen';
 
@@ -66,7 +67,9 @@ function Root() {
           <Route path="/agency/meeting-report" element={<MeetingReportScreen userId={session.user.id} />} />
           <Route path="/agency/prospect-purge" element={<ProspectPurgeScreen />} />
           <Route path="/agency/*" element={<Navigate to="/agency" replace />} />
-          <Route path="/notes/*" element={<ComingSoonScreen title="Notes" />} />
+          <Route path="/notes" element={<NotesScreen />} />
+          <Route path="/notes/:id" element={<NotesScreen />} />
+          <Route path="/notes/*" element={<Navigate to="/notes" replace />} />
           <Route path="/settings/*" element={<ComingSoonScreen title="Réglages" />} />
           <Route path="*" element={<Navigate to="/today" replace />} />
         </Route>

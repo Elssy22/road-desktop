@@ -1723,3 +1723,114 @@ button {
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
+
+/* --- Notes --- */
+
+/* Liste à gauche, éditeur à droite ; empilés sur fenêtre étroite. */
+.notes-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 2fr) minmax(0, 3fr);
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .notes-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.row--active {
+  background: var(--color-surface-muted);
+}
+
+.row__title--faint {
+  color: var(--color-text-faint);
+}
+
+.note-row__preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note-row__date {
+  color: var(--color-text-faint);
+}
+
+/* Épingle : visible au survol de la ligne, toujours visible (soleil) une fois épinglée. */
+.note-pin {
+  opacity: 0;
+}
+
+.row:hover .note-pin,
+.note-pin:focus-visible,
+.note-pin--on,
+.note-editor .note-pin {
+  opacity: 1;
+}
+
+.note-pin--on {
+  color: var(--color-primary);
+}
+
+.icon-button--danger {
+  color: var(--color-danger);
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Feuille blanche, liseré lavande de la catégorie Notes. */
+.note-editor {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 4px solid var(--tint-lavender-icon-bg);
+}
+
+.note-editor__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md) 0 var(--space-lg);
+}
+
+.note-editor__status {
+  flex: 1;
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.note-editor__title,
+.note-editor__body {
+  width: 100%;
+  font: inherit;
+  color: var(--color-text);
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.note-editor__title {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 700;
+}
+
+.note-editor__body {
+  min-height: 60vh;
+  padding: var(--space-sm) var(--space-lg) var(--space-xxl);
+  font-size: 16px;
+  line-height: 1.5;
+  resize: none;
+}
+
+.note-editor__title::placeholder,
+.note-editor__body::placeholder {
+  color: var(--color-text-faint);
+}
