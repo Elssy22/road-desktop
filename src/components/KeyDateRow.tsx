@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 import { CATEGORY_LABELS, type KeyDateWithContact } from '../data/keyDates';
 import { formatDueLabel } from '../lib/dates';
 import { alertLevel, countdownLabel, daysUntil, type AlertLevel } from '../lib/keyDateAlerts';
@@ -11,10 +13,11 @@ const ALERT_COLORS: Record<AlertLevel, string> = {
 };
 
 /**
- * Ligne d'échéance (KeyDateRow de mobile-legacy/src/screens/agency/KeyDatesScreen.tsx).
- * Le formulaire de date clé arrivera avec le menu Agence.
+ * Ligne d'échéance (KeyDateRow de mobile-legacy/src/screens/agency/KeyDatesScreen.tsx),
+ * aussi affichée par la Vue du jour et le calendrier. Le clic ouvre le formulaire.
  */
 export function KeyDateRow({ keyDate, today }: { keyDate: KeyDateWithContact; today: string }) {
+  const navigate = useNavigate();
   const days = daysUntil(keyDate.date, today);
   const level = alertLevel(days);
   const meta = [
@@ -28,6 +31,7 @@ export function KeyDateRow({ keyDate, today }: { keyDate: KeyDateWithContact; to
       title={keyDate.title || 'Sans titre'}
       subtitle={meta.join(' · ')}
       right={level ? <Badge label={countdownLabel(days)} color={ALERT_COLORS[level]} /> : null}
+      onClick={() => navigate(`/agency/key-dates/${keyDate.id}`)}
     />
   );
 }
