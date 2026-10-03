@@ -1681,6 +1681,54 @@ button {
   color: var(--color-danger);
 }
 
+/* --- Veille BOAMP --- */
+
+/* Avis : objet, acheteur, date limite, catégories, statut et liens. */
+.tender-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tender-row:last-child {
+  border-bottom: none;
+}
+
+.tender-row__deadline {
+  font-weight: 600;
+}
+
+.tender-row__categories {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-faint);
+}
+
+.tender-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.tender-row a.text-action {
+  text-decoration: none;
+}
+
+/* Mot-clé enregistré : pastille blanche, clic = retirer. */
+.keyword-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.keyword-chip svg {
+  color: var(--tint-fg);
+}
+
 /* Aperçu d'une image déchiffrée (URL blob en mémoire). */
 .vault-preview {
   display: block;
