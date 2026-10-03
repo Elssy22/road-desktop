@@ -192,27 +192,93 @@ export function Badge({ label, color }: { label: string; color: string }) {
   );
 }
 
-/** Ligne d'une liste dans une carte : titre, sous-titre, élément à droite. */
+/**
+ * Ligne d'une liste dans une carte : titre, sous-titre, élément à droite.
+ * Avec `onClick`, le titre et le sous-titre deviennent un bouton (ouvrir la fiche…).
+ */
 export function ListRow({
   title,
   subtitle,
   left,
   right,
+  onClick,
+  muted,
 }: {
   title: string;
   subtitle?: string | null;
   left?: ReactNode;
   right?: ReactNode;
+  onClick?: () => void;
+  /** Titre grisé et barré (prospect perdu). */
+  muted?: boolean;
 }) {
+  const text = (
+    <>
+      <span className={muted ? 'row__title row__title--done' : 'row__title row__title--strong'}>{title}</span>
+      {subtitle ? <span className="row__subtitle">{subtitle}</span> : null}
+    </>
+  );
   return (
     <li className="row">
       {left}
-      <div className="row__main">
-        <p className="row__title row__title--strong">{title}</p>
-        {subtitle ? <p className="row__subtitle">{subtitle}</p> : null}
-      </div>
+      {onClick ? (
+        <button type="button" className="row__main row__button" onClick={onClick}>
+          {text}
+        </button>
+      ) : (
+        <div className="row__main">{text}</div>
+      )}
       {right}
     </li>
+  );
+}
+
+/** Pastille sélectionnable (rôle, segment, type d'interaction). */
+export function Chip({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className={selected ? 'chip chip--selected' : 'chip'}
+      aria-pressed={selected}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+export function ChipRow({ children }: { children: ReactNode }) {
+  return <div className="chip-row">{children}</div>;
+}
+
+/**
+ * Champ de formulaire : libellé au-dessus, contenu libre, message d'erreur
+ * facultatif. `htmlFor` relie le libellé à son champ ; sans lui (groupe de
+ * pastilles), le libellé n'est qu'un texte, pour ne pas cliquer la première pastille.
+ */
+export function FormField({
+  label,
+  htmlFor,
+  error,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  error?: string | null;
+  children: ReactNode;
+}) {
+  return (
+    <div className="form-field">
+      {htmlFor ? (
+        <label className="form-field__label" htmlFor={htmlFor}>
+          {label}
+        </label>
+      ) : (
+        <span className="form-field__label">{label}</span>
+      )}
+      {children}
+      {error ? <span className="form-field__error">{error}</span> : null}
+    </div>
   );
 }
 
