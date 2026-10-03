@@ -53,5 +53,9 @@ export const setTaskDueDate = (task: Task, dueDate: string | null) => updateRow(
 
 export const setTaskPriority = (task: Task, priority: TaskPriority) => updateRow(TASKS, task.id, { priority });
 
+/** Rattache la tâche à un projet (null = la détacher). */
+export const setTaskProject = (task: Task, projectId: string | null) =>
+  updateRow(TASKS, task.id, { project_id: projectId });
+
 /** Suppression logique : la ligne reste en base avec deleted_at pour être propagée au mobile. */
 export const softDeleteTask = (task: Task) => softDeleteRow(TASKS, task.id);
