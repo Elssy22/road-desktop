@@ -30,6 +30,7 @@ import { ReminderFormScreen } from './screens/ReminderFormScreen';
 import { SearchScreen } from './screens/SearchScreen';
 import { TasksScreen } from './screens/TasksScreen';
 import { TodayScreen } from './screens/TodayScreen';
+import { WeeklyReviewScreen } from './screens/WeeklyReviewScreen';
 
 function Root() {
   const { session, ready } = useSession();
@@ -75,6 +76,7 @@ function Root() {
           <Route path="/reminders/new" element={<ReminderFormScreen />} />
           <Route path="/reminders/:id" element={<ReminderFormScreen />} />
           <Route path="/search" element={<SearchScreen />} />
+          <Route path="/weekly-review" element={<WeeklyReviewScreen userId={session.user.id} />} />
           <Route path="/notes" element={<NotesScreen />} />
           <Route path="/notes/:id" element={<NotesScreen />} />
           <Route path="/notes/*" element={<Navigate to="/notes" replace />} />

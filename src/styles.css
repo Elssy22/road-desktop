@@ -1765,6 +1765,43 @@ button {
   color: var(--color-primary);
 }
 
+/* --- Revue de la semaine --- */
+
+.week-nav {
+  margin-bottom: var(--space-lg);
+}
+
+.week-nav .period {
+  margin-bottom: 0;
+}
+
+.week-nav__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.icon-button--round:disabled {
+  opacity: 0.25;
+}
+
+/* Projet ou objectif : titre et avancement, barre dessous. */
+.progress-line {
+  gap: var(--space-xs);
+}
+
+.progress-line__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.progress-line__head .row__meta-item {
+  flex: none;
+}
+
 /* --- Notes --- */
 
 /* Liste à gauche, éditeur à droite ; empilés sur fenêtre étroite. */

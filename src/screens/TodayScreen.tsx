@@ -1,4 +1,4 @@
-import { AlarmClock, CalendarDays, Hourglass, Plus, SquareCheck, Star } from 'lucide-react';
+import { AlarmClock, CalendarCheck, CalendarDays, Hourglass, Plus, SquareCheck, Star } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,6 +30,7 @@ const NO_REMINDERS: ReminderWithLinks[] = [];
  * priorités, échéances et rappels la colonne de droite.
  */
 export function TodayScreen({ userId }: { userId: string }) {
+  const navigate = useNavigate();
   const today = useToday();
   const taskInput = useRef<HTMLInputElement>(null);
 
@@ -44,7 +45,12 @@ export function TodayScreen({ userId }: { userId: string }) {
       <ScreenHeader
         eyebrow="Aujourd'hui"
         title={formatLongDateTitle(today)}
-        action={<GradientButton label="Nouvelle tâche" icon={Plus} onClick={newTask} />}
+        action={
+          <div className="header-actions">
+            <TextAction label="Revue de la semaine" icon={CalendarCheck} onClick={() => navigate('/weekly-review')} />
+            <GradientButton label="Nouvelle tâche" icon={Plus} onClick={newTask} />
+          </div>
+        }
       />
       <div className="columns">
         <div className="columns__main">
