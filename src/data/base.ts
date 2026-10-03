@@ -62,9 +62,13 @@ export function notifyDataChanged() {
 
 // --- Écritures génériques --------------------------------------------------
 
-export async function insertRow(table: string, fields: Record<string, unknown>): Promise<string> {
+/** `id` fourni quand l'écran le connaît avant l'insertion (éditeur de note). */
+export async function insertRow(
+  table: string,
+  fields: Record<string, unknown>,
+  id: string = crypto.randomUUID()
+): Promise<string> {
   const ts = new Date().toISOString();
-  const id = crypto.randomUUID();
   unwrap(await supabase.from(table).insert({ ...fields, id, created_at: ts, updated_at: ts }));
   notifyDataChanged();
   return id;

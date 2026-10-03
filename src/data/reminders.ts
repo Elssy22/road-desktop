@@ -1,6 +1,6 @@
 import { fromDateKey, type DateKey } from '../lib/dates';
 import { supabase } from '../lib/supabase';
-import { fetchAll, updateRow, type BaseRow } from './base';
+import { fetchAll, insertRow, softDeleteRow, unwrap, updateRow, type BaseRow, type Fields } from './base';
 import { contactNames } from './crm';
 import { taskTitles } from './tasks';
 
@@ -90,6 +90,17 @@ export async function listOpenRemindersForContact(contactId: string): Promise<Re
   );
   return withLinks(rows);
 }
+
+/** Rappel vivant, ou null s'il n'existe pas ou a été supprimé. */
+export async function getReminder(id: string): Promise<Reminder | null> {
+  return unwrap(await supabase.from(REMINDERS).select('*').eq('id', id).is('deleted_at', null).maybeSingle());
+}
+
+export const addReminder = (fields: Fields<Reminder>) => insertRow(REMINDERS, fields);
+
+export const updateReminder = (id: string, patch: Partial<Fields<Reminder>>) => updateRow(REMINDERS, id, patch);
+
+export const softDeleteReminder = (id: string) => softDeleteRow(REMINDERS, id);
 
 export const setReminderDone = (reminder: Reminder, done: boolean) => updateRow(REMINDERS, reminder.id, { done });
 
