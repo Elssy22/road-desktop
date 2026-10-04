@@ -209,6 +209,14 @@ button {
   white-space: nowrap;
 }
 
+.sidebar__error {
+  margin: 0;
+  padding: 0 var(--space-md);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-danger);
+}
+
 .nav-link {
   display: flex;
   align-items: center;
@@ -798,15 +806,28 @@ button {
 
 /* --- Boîte de dialogue --- */
 
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
+/* <dialog> natif plein écran et transparent : la carte .dialog est centrée
+   dedans, un clic sur la zone vide (la boîte elle-même) ferme. */
+.modal {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-xl);
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+.modal[open] {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-xl);
-  background: rgba(17, 21, 29, 0.35);
+}
+
+.modal::backdrop {
+  background: var(--color-overlay);
 }
 
 .dialog {

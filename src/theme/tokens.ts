@@ -135,6 +135,8 @@ export type Palette = {
   success: string;
   /** Rendez-vous (= `tints.sky.fg`). */
   appointment: string;
+  /** Voile derrière une boîte de dialogue. */
+  overlay: string;
   tints: Record<TintName, Tint>;
 };
 
@@ -158,6 +160,7 @@ export const lightPalette: Palette = {
   warning: '#8A5E07',
   success: '#2B7A4D',
   appointment: '#2F5E9E',
+  overlay: 'rgba(17, 21, 29, 0.35)',
   tints: {
     peach: { bg: '#FFEBDD', border: '#FADBC6', iconBg: '#FFD6BC', fg: '#A84A1A' },
     sky: { bg: '#E3EEFD', border: '#D0E0F7', iconBg: '#C9DDFA', fg: '#2F5E9E' },
@@ -188,6 +191,7 @@ export const darkPalette: Palette = {
   warning: '#E9C973',
   success: '#8FD6AE',
   appointment: '#9CC0F0',
+  overlay: 'rgba(0, 0, 0, 0.6)',
   tints: {
     peach: { bg: '#33261F', border: '#4A3529', iconBg: '#4D3528', fg: '#F4B48E' },
     sky: { bg: '#1D2838', border: '#2B3A50', iconBg: '#2A3A52', fg: '#9CC0F0' },
