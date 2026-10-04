@@ -16,6 +16,7 @@ import { useRemoteQuery } from '../data/useRemoteQuery';
 import { useTasks } from '../data/useTasks';
 import { loadDailyPriorities, saveDailyPriorities } from '../lib/dailyPriorities';
 import { addDays, formatLongDateTitle, type DateKey } from '../lib/dates';
+import { errorMessage } from '../lib/errors';
 import { TODAY_ALERT_DAYS } from '../lib/keyDateAlerts';
 import { tasksForToday } from '../lib/taskGroups';
 import { useToday } from '../lib/useToday';
@@ -178,7 +179,7 @@ function TodayReminders({ today }: { today: DateKey }) {
   const toggle = (r: ReminderWithLinks) =>
     void setReminderDone(r, !r.done)
       .then(() => setWriteError(null))
-      .catch((e: unknown) => setWriteError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => setWriteError(errorMessage(e)));
 
   return (
     <CategoryCard

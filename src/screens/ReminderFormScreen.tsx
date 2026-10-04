@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 
 import { useConfirm } from '../components/Dialog';
 import { ContactSelect } from '../components/ContactSelect';
+import { errorMessage } from '../lib/errors';
 import { CardNote, CategoryCard, ErrorBanner, FormField, ScreenHeader } from '../components/ui';
 import { listContacts, type ContactWithLast } from '../data/crm';
 import {
@@ -106,7 +107,7 @@ function ReminderForm({ id }: { id?: string }) {
             contact_id: r.contact_id,
           });
       })
-      .catch((e: unknown) => active && setLoadError(e instanceof Error ? e.message : String(e)))
+      .catch((e: unknown) => active && setLoadError(errorMessage(e)))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;

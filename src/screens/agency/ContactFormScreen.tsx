@@ -28,6 +28,7 @@ import {
 import { useWrite } from '../../data/useWrite';
 import { changedFields } from '../../data/base';
 import type { DateKey } from '../../lib/dates';
+import { errorMessage } from '../../lib/errors';
 import { amountToInput, parseAmount } from '../../lib/money';
 
 type Form = {
@@ -106,7 +107,7 @@ function ContactForm({ id }: { id?: string }) {
         setContact(c);
         if (c) setForm(toForm(c));
       })
-      .catch((e: unknown) => active && setLoadError(e instanceof Error ? e.message : String(e)))
+      .catch((e: unknown) => active && setLoadError(errorMessage(e)))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;

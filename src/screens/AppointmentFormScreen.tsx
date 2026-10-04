@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import { useConfirm } from '../components/Dialog';
 import { ContactSelect } from '../components/ContactSelect';
 import { ExternalLinkAction } from '../components/ExternalLinkAction';
+import { errorMessage } from '../lib/errors';
 import { CardList, CardNote, CategoryCard, ErrorBanner, FormField, ScreenHeader, TextAction } from '../components/ui';
 import {
   addAppointment,
@@ -135,7 +136,7 @@ function AppointmentForm({ id }: { id?: string }) {
         setAppointment(a);
         if (a) setForm(toForm(a));
       })
-      .catch((e: unknown) => active && setLoadError(e instanceof Error ? e.message : String(e)))
+      .catch((e: unknown) => active && setLoadError(errorMessage(e)))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;

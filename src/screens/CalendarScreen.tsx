@@ -24,6 +24,7 @@ import {
   WEEKDAY_INITIALS,
   type DateKey,
 } from '../lib/dates';
+import { errorMessage } from '../lib/errors';
 import { useToday } from '../lib/useToday';
 
 type Mode = 'month' | 'week';
@@ -144,7 +145,7 @@ export function CalendarScreen() {
   const toggleReminder = (r: ReminderWithLinks) =>
     void setReminderDone(r, !r.done)
       .then(() => setWriteError(null))
-      .catch((e: unknown) => setWriteError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => setWriteError(errorMessage(e)));
   const empty = dayAppointments.length + dayTasks.length + dayKeyDates.length + dayReminders.length === 0;
 
   const arrow = (delta: -1 | 1) => {

@@ -10,6 +10,7 @@ import { addDocument, listDocuments, type DocumentWithLinks } from '../../data/d
 import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { formatEditedLabel } from '../../lib/dates';
+import { errorMessage } from '../../lib/errors';
 import { useVaultLock } from '../../lib/useVaultLock';
 import { encryptDocument } from '../../lib/vault';
 import { checkFileSize, readPickedFile, uploadEncrypted } from '../../lib/vaultFiles';
@@ -81,7 +82,7 @@ export function VaultScreen({ userId }: { userId: string }) {
       });
       setDraft(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setStep(null);
     }

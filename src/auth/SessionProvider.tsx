@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import { notifyDataChanged } from '../data/base';
+import { errorMessage } from '../lib/errors';
 import { supabase } from '../lib/supabase';
 
 // Repris du mobile. Sans équivalent d'AppState ici : dans une webview,
@@ -28,7 +29,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setState({ session: data.session, ready: true, error: error?.message ?? null })
       )
       .catch((e: unknown) =>
-        setState((s) => ({ ...s, ready: true, error: e instanceof Error ? e.message : String(e) }))
+        setState((s) => ({ ...s, ready: true, error: errorMessage(e) }))
       );
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       setState((s) => ({ ...s, session, ready: true }));

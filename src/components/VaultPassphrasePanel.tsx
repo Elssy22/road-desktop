@@ -1,6 +1,7 @@
 import { KeyRound, Lock } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
+import { errorMessage } from '../lib/errors';
 import {
   getVaultConfig,
   passphraseProblem,
@@ -42,7 +43,7 @@ export function VaultPassphrasePanel({ userId, onUnlocked }: { userId: string; o
       setConfirmation('');
       onUnlocked();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setBusy(false);
     }

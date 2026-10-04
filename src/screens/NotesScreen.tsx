@@ -18,6 +18,7 @@ import {
 } from '../data/notes';
 import { useRemoteQuery } from '../data/useRemoteQuery';
 import { useWrite } from '../data/useWrite';
+import { errorMessage } from '../lib/errors';
 import { readStored, removeStored, writeStored } from '../lib/localStore';
 import { makeMatcher } from '../lib/search';
 import { useToday } from '../lib/useToday';
@@ -218,7 +219,7 @@ function NoteEditor({
       })
       .catch((e: unknown) => {
         if (!active) return;
-        setError(e instanceof Error ? e.message : String(e));
+        setError(errorMessage(e));
         setStatus('missing');
       });
     return () => {
@@ -257,7 +258,7 @@ function NoteEditor({
       } catch (e) {
         // La prochaine saisie retentera l'écriture.
         savedRef.current = confirmedRef.current;
-        if (mountedRef.current) setError(e instanceof Error ? e.message : String(e));
+        if (mountedRef.current) setError(errorMessage(e));
       }
     });
   }, [noteId]);
@@ -293,7 +294,7 @@ function NoteEditor({
         await softDeleteNote(noteId);
       } catch (e) {
         deletedRef.current = false;
-        setError(e instanceof Error ? e.message : String(e));
+        setError(errorMessage(e));
         return;
       }
     }

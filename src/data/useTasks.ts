@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { addDays, todayKey } from '../lib/dates';
+import { errorMessage } from '../lib/errors';
 import {
   addTask,
   listTasks,
@@ -26,7 +27,7 @@ export function useTasks() {
   const run = (write: () => Promise<unknown>) =>
     write()
       .then(() => setWriteError(null))
-      .catch((e: unknown) => setWriteError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => setWriteError(errorMessage(e)));
 
   return {
     tasks,

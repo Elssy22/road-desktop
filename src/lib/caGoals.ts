@@ -39,17 +39,6 @@ export function formatCaPeriod(targetDate: DateKey, period: CaPeriod): string {
   return `du ${formatShortDate(start)} au ${formatShortDate(end)}`;
 }
 
-/** Euros sans centimes quand le montant est rond : "12 400 €", "12 399,60 €". */
-export function formatEuros(amount: number): string {
-  const digits = Number.isInteger(amount) ? 0 : 2;
-  return amount.toLocaleString('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  });
-}
-
 /** Pourcentage entier, plafonné à 100 ; arrondi vers le bas pour n'afficher 100 % qu'une fois la cible atteinte. */
 export function caProgress(collectedCents: number, targetAmount: number | null): number {
   if (!targetAmount || targetAmount <= 0) return 0;

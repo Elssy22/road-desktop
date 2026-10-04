@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { errorMessage } from '../lib/errors';
 import { onDataChanged } from './base';
 
 /**
@@ -30,7 +31,7 @@ export function useRemoteQuery<T>(load: () => Promise<T>, initial: T) {
         })
         .catch((e: unknown) => {
           if (!active || call !== latest) return;
-          setError(e instanceof Error ? e.message : String(e));
+          setError(errorMessage(e));
         })
         .finally(() => {
           if (active && call === latest) setLoading(false);

@@ -13,6 +13,7 @@ import {
 } from '../../components/ui';
 import { notifyDataChanged } from '../../data/base';
 import { addImportedContacts, listContactNameValues, PIPELINE_STAGE_LABELS, segmentLabel } from '../../data/crm';
+import { errorMessage } from '../../lib/errors';
 import {
   ACCEPTED_EXTENSIONS,
   mapTable,
@@ -62,7 +63,7 @@ export function ContactImportScreen({ userId }: { userId: string }) {
     try {
       setParsed({ ...mapTable(await readTable(file)), fileName: file.name });
     } catch (e) {
-      setError(`Lecture de « ${file.name} » impossible : ${e instanceof Error ? e.message : String(e)}`);
+      setError(`Lecture de « ${file.name} » impossible : ${errorMessage(e)}`);
     }
   };
 
@@ -95,7 +96,7 @@ export function ContactImportScreen({ userId }: { userId: string }) {
       }
       setResult({ created, existing, duplicates });
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
+      const message = errorMessage(e);
       setError(
         created > 0
           ? `Import interrompu après ${plural(created, 'contact')} créé${created > 1 ? 's' : ''} : ${message}. Relance l’import : les contacts déjà créés seront ignorés.`

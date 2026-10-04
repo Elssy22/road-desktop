@@ -9,6 +9,9 @@ export function formatMoney(amount: number, currency: string): string {
   }
 }
 
+/** Montant en euros, même format que partout ailleurs ("12 400,00 €"). */
+export const formatEuros = (amount: number) => formatMoney(amount, 'EUR');
+
 /** Saisie libre ("1 200,5", "1200.50") → nombre positif, ou null si invalide. */
 export function parseAmount(text: string): number | null {
   const cleaned = text.replace(/[\s  ]/g, '').replace(',', '.');

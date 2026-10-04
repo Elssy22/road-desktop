@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ContactSelect } from '../../components/ContactSelect';
+import { errorMessage } from '../../lib/errors';
 import { useConfirm } from '../../components/Dialog';
 import {
   CardList,
@@ -107,7 +108,7 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
       });
     } catch (e) {
       // Les notes restent dans le champ (et dans le brouillon) : rien n'est perdu.
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -144,7 +145,7 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
       });
     } catch (e) {
       setSaving(false);
-      setSaveError(`Enregistrement impossible : ${e instanceof Error ? e.message : String(e)}`);
+      setSaveError(`Enregistrement impossible : ${errorMessage(e)}`);
       return;
     }
     changeNotes('');

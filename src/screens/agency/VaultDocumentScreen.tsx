@@ -8,6 +8,7 @@ import { VaultPassphrasePanel } from '../../components/VaultPassphrasePanel';
 import { getDocument, softDeleteDocument, type DocumentWithLinks } from '../../data/documents';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { formatEditedLabel } from '../../lib/dates';
+import { errorMessage } from '../../lib/errors';
 import { useVaultLock } from '../../lib/useVaultLock';
 import { decryptDocument, type DocumentMeta } from '../../lib/vault';
 import { canPreview, decryptedUrl, downloadEncrypted, removeEncrypted, saveDecrypted } from '../../lib/vaultFiles';
@@ -52,7 +53,7 @@ function VaultDocument({ id, userId }: { id: string; userId: string }) {
       const { meta, bytes } = await decryptDocument(userId, blob);
       setOpened({ meta, url: decryptedUrl(meta, bytes), size: bytes.length });
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setStep(null);
     }
@@ -71,7 +72,7 @@ function VaultDocument({ id, userId }: { id: string; userId: string }) {
             void removeEncrypted(doc.storage_path);
             navigate('/agency/vault', { replace: true });
           })
-          .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err))),
+          .catch((err: unknown) => setError(errorMessage(err))),
     });
   };
 

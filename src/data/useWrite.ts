@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 
+import { errorMessage } from '../lib/errors';
+
 /**
  * Écritures d'un écran : `run` exécute l'écriture et retient son erreur
  * (effacée à la réussite suivante), à afficher dans un ErrorBanner. Renvoie
@@ -14,7 +16,7 @@ export function useWrite() {
       setError(null);
       return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorMessage(e));
       return false;
     }
   }, []);

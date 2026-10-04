@@ -13,7 +13,8 @@ import {
 } from '../../components/ui';
 import { isCaGoal, listGoals, type GoalList, type GoalWithProject, type QontoReceipts } from '../../data/goals';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
-import { formatCaPeriod, formatEuros } from '../../lib/caGoals';
+import { formatCaPeriod } from '../../lib/caGoals';
+import { formatEuros } from '../../lib/money';
 import { formatDueLabel, formatEditedLabel, type DateKey } from '../../lib/dates';
 import { useToday } from '../../lib/useToday';
 

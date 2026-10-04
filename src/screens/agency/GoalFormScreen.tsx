@@ -29,9 +29,10 @@ import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
 import { changedFields } from '../../data/base';
-import { CA_PERIODS, caPeriodBounds, caProgress, formatCaPeriod, formatEuros, type CaPeriod, type GoalKind } from '../../lib/caGoals';
+import { CA_PERIODS, caPeriodBounds, caProgress, formatCaPeriod, type CaPeriod, type GoalKind } from '../../lib/caGoals';
 import type { DateKey } from '../../lib/dates';
-import { amountToInput, parseAmount } from '../../lib/money';
+import { errorMessage } from '../../lib/errors';
+import { amountToInput, formatEuros, parseAmount } from '../../lib/money';
 
 type Form = {
   title: string;
@@ -103,7 +104,7 @@ function GoalForm({ id, userId }: { id?: string; userId: string }) {
         setGoal(g);
         if (g) setForm(toForm(g));
       })
-      .catch((e: unknown) => active && setLoadError(e instanceof Error ? e.message : String(e)))
+      .catch((e: unknown) => active && setLoadError(errorMessage(e)))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;

@@ -1,4 +1,5 @@
 import { caPeriodBounds, caProgress, type CaPeriod, type GoalKind } from '../lib/caGoals';
+import { errorMessage } from '../lib/errors';
 import { fetchQontoReceipts, type QontoReceipt } from '../lib/qonto';
 import { supabase } from '../lib/supabase';
 import { fetchAll, insertRow, softDeleteRow, unwrap, updateRow, type BaseRow, type Fields } from './base';
@@ -77,7 +78,7 @@ export async function loadQontoReceipts(userId: string): Promise<QontoReceipts> 
     const rows = unwrap(last) as { updated_at: string }[];
     return { receipts, importedAt: rows[0]?.updated_at ?? null, error: null };
   } catch (e) {
-    return { receipts: null, importedAt: null, error: e instanceof Error ? e.message : String(e) };
+    return { receipts: null, importedAt: null, error: errorMessage(e) };
   }
 }
 
