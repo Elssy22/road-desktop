@@ -181,7 +181,6 @@ export function mapTable(table: Table): MappedTable {
 
   const contacts: ImportedContact[] = [];
   let skippedNoName = 0;
-  const now = new Date().toISOString();
   for (const line of lines) {
     const get = (f: Field) => {
       const i = fields.indexOf(f);
@@ -195,12 +194,12 @@ export function mapTable(table: Table): MappedTable {
     const others = headers
       .map((h, i) => (!fields[i] && h && line[i] ? `${h} : ${line[i]}` : null))
       .filter((l): l is string => l !== null);
-    contacts.push(mapLine(get, others, now));
+    contacts.push(mapLine(get, others));
   }
   return { contacts, skippedNoName, extra };
 }
 
-function mapLine(get: (f: Field) => string, others: string[], now: string): ImportedContact {
+function mapLine(get: (f: Field) => string, others: string[]): ImportedContact {
   const type = get('type');
   const level = get('level');
   const notes: string[] = [];
@@ -238,7 +237,10 @@ function mapLine(get: (f: Field) => string, others: string[], now: string): Impo
     pipeline_stage: STATUSES[headerKey(status)] ?? 'a_demarcher',
     pipeline_amount: null,
     next_followup_date: null,
-    stage_changed_at: now,
+    // Pas de date de changement d'étape : l'étape vient du fichier, elle n'a pas
+    // changé dans Road. Sans elle, la séquence de relances du mobile ne démarre
+    // pas pour un « Deck envoyé » importé (DECISIONS.md §36, B1).
+    stage_changed_at: null,
   };
 }
 

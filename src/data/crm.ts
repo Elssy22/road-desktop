@@ -1,3 +1,5 @@
+import { autoTaskTitle } from '../lib/crmFollowups';
+import { autoTaskId } from '../lib/followupTaskId';
 import { supabase } from '../lib/supabase';
 import {
   fetchAll,
@@ -243,14 +245,36 @@ export async function listContactNameValues(): Promise<string[]> {
 /**
  * Insère plusieurs contacts en une requête (un lot de l'import de fichier).
  * Pas de notifyDataChanged ici : l'écran d'import prévient une fois à la fin.
+ *
+ * Un import ne déclenche pas la séquence de relances (DECISIONS.md §36, B1) :
+ * chaque prospect « À démarcher » reçoit une tâche « Envoyer le deck » déjà
+ * supprimée, à l'id que le mobile calculerait. Le mobile y voit une étape
+ * sautée et ne crée pas une tâche par contact importé. La séquence démarre
+ * normalement au premier mail, appel ou deck enregistré.
  */
-export async function addContacts(rows: Fields<Contact>[]) {
+export async function addImportedContacts(userId: string, rows: Fields<Contact>[]) {
   const ts = new Date().toISOString();
-  unwrap(
-    await supabase
-      .from(CONTACTS)
-      .insert(rows.map((fields) => ({ ...fields, id: crypto.randomUUID(), created_at: ts, updated_at: ts })))
+  const contacts = rows.map((fields) => ({ ...fields, id: crypto.randomUUID(), created_at: ts, updated_at: ts }));
+  const skippedDecks = await Promise.all(
+    contacts
+      .filter((c) => c.pipeline_stage === 'a_demarcher')
+      .map(async (c) => ({
+        id: await autoTaskId(userId, c.id, 'deck'),
+        title: autoTaskTitle('deck', c.name),
+        done: false,
+        due_date: null,
+        priority: 1,
+        contact_id: c.id,
+        auto_kind: 'deck',
+        created_at: ts,
+        updated_at: ts,
+        deleted_at: ts,
+      }))
   );
+  // Tâches d'abord : un échec entre les deux requêtes ne laisse aucun prospect
+  // sans sa tâche sautée (une tâche orpheline supprimée est sans effet).
+  if (skippedDecks.length > 0) unwrap(await supabase.from('tasks').insert(skippedDecks));
+  unwrap(await supabase.from(CONTACTS).insert(contacts));
 }
 
 export const updateContact =(id: string, patch: Partial<Fields<Contact>>) => updateRow(CONTACTS, id, patch);

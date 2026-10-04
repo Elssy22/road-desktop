@@ -12,7 +12,7 @@ import {
   TextAction,
 } from '../../components/ui';
 import { notifyDataChanged } from '../../data/base';
-import { addContacts, listContactNameValues, PIPELINE_STAGE_LABELS, segmentLabel } from '../../data/crm';
+import { addImportedContacts, listContactNameValues, PIPELINE_STAGE_LABELS, segmentLabel } from '../../data/crm';
 import {
   ACCEPTED_EXTENSIONS,
   mapTable,
@@ -38,7 +38,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
  * confirmation explicite, puis insertion par lots. Un contact dont le nom
  * existe déjà (ou apparaît deux fois dans le fichier) est ignoré.
  */
-export function ContactImportScreen() {
+export function ContactImportScreen({ userId }: { userId: string }) {
   const navigate = useNavigate();
   const fileInput = useRef<HTMLInputElement>(null);
   const [parsed, setParsed] = useState<Parsed | null>(null);
@@ -89,7 +89,7 @@ export function ContactImportScreen() {
       setProgress({ done: skipped, total: contacts.length });
       for (let i = 0; i < fresh.length; i += BATCH_SIZE) {
         const batch = fresh.slice(i, i + BATCH_SIZE);
-        await addContacts(batch);
+        await addImportedContacts(userId, batch);
         created += batch.length;
         setProgress({ done: skipped + created, total: contacts.length });
       }
@@ -147,6 +147,10 @@ export function ContactImportScreen() {
             </CardNote>
             <CardNote>
               Le fichier est lu sur cet ordinateur ; rien n’est enregistré avant ta confirmation, après l’aperçu.
+            </CardNote>
+            <CardNote>
+              Les contacts importés entrent dans le pipeline sans créer de relances automatiques : la séquence d’un
+              prospect démarre au premier mail, appel ou deck enregistré sur sa fiche.
             </CardNote>
           </CategoryCard>
         )}
