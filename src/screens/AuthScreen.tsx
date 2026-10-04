@@ -23,6 +23,8 @@ const RESET_SENT =
   'Ouvre-le depuis ton téléphone (l’app Road mobile doit être installée), ' +
   'puis reconnecte-toi ici avec le nouveau mot de passe.';
 const NETWORK_ERROR = 'Impossible de joindre le serveur. Vérifie ta connexion puis réessaie.';
+/** Session perdue sans déconnexion demandée (jeton de rafraîchissement expiré ou révoqué). */
+const SESSION_EXPIRED = 'Ta session a expiré : reconnecte-toi pour retrouver tes données.';
 
 /**
  * Message affiché après une demande de réinitialisation. Ne doit jamais révéler
@@ -54,7 +56,7 @@ export function AuthLayout({ title, children }: { title: string; children: React
  * même auth.uid() et mêmes données via la RLS.
  */
 export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' | 'forgot' }) {
-  const { error: sessionError } = useSession();
+  const { error: sessionError, expired } = useSession();
   const [mode, setMode] = useState<'signIn' | 'forgot'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -109,7 +111,13 @@ export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' 
     void (forgot ? sendReset() : signIn());
   };
 
-  const message = notice ?? (sessionError ? { text: `Session : ${sessionError}`, tone: 'error' as const } : null);
+  const message =
+    notice ??
+    (expired
+      ? { text: SESSION_EXPIRED, tone: 'info' as const }
+      : sessionError
+        ? { text: `Session : ${sessionError}`, tone: 'error' as const }
+        : null);
 
   return (
     <AuthLayout title={forgot ? 'Mot de passe oublié' : 'Bonjour'}>

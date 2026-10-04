@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { supabase } from '../lib/supabase';
+import { setUserSigningOut } from './SessionProvider';
 
 /**
  * Déconnexion (barre latérale et Réglages). Hors ligne, la révocation côté
@@ -15,6 +16,7 @@ export function useSignOut() {
   const signOut = async () => {
     setBusy(true);
     setError(null);
+    setUserSigningOut(true);
     try {
       const { error: remote } = await supabase.auth.signOut().catch((e: unknown) => ({ error: e }));
       if (remote) {
@@ -22,6 +24,7 @@ export function useSignOut() {
         if (local) setError(`Déconnexion impossible : ${local.message}`);
       }
     } finally {
+      setUserSigningOut(false);
       setBusy(false);
     }
   };

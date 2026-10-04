@@ -15,6 +15,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const SESSION_UNAVAILABLE =
   'Session momentanément indisponible (connexion perdue ou jeton en cours de renouvellement). Les données affichées ne sont peut-être pas à jour ; elles se rechargeront dès le retour de la connexion.';
 
+/**
+ * Évènement de fenêtre émis à chaque requête refusée par la garde ci-dessous.
+ * Un évènement plutôt qu'un rappel enregistré ici : le client est conservé
+ * d'un rechargement HMR à l'autre, pas les variables de ce module.
+ */
+export const SESSION_REFUSED_EVENT = 'road:session-refused';
+
 /** Services protégés par la RLS ou par un contrôle d'utilisateur : jamais appelés en anonyme. */
 const PROTECTED_PATHS = ['/rest/v1/', '/storage/v1/', '/functions/v1/'].map((p) => new URL(p, supabaseUrl).href);
 
@@ -26,6 +33,8 @@ const PROTECTED_PATHS = ['/rest/v1/', '/storage/v1/', '/functions/v1/'].map((p) 
  * jeton ; la RLS répond 200 avec zéro ligne, et l'écran remplaçait les vraies
  * données par des listes vides. Ici, une telle requête est refusée avant
  * de partir : l'écran garde ses données et affiche une erreur passagère.
+ * Chaque refus émet SESSION_REFUSED_EVENT : SessionProvider vérifie alors si
+ * la session est seulement indisponible ou définitivement perdue.
  */
 const guardedFetch: typeof fetch = (input, init) => {
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -33,7 +42,10 @@ const guardedFetch: typeof fetch = (input, init) => {
     const auth = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined)).get(
       'Authorization'
     );
-    if (!auth || auth === `Bearer ${supabaseAnonKey}`) return Promise.reject(new Error(SESSION_UNAVAILABLE));
+    if (!auth || auth === `Bearer ${supabaseAnonKey}`) {
+      window.dispatchEvent(new Event(SESSION_REFUSED_EVENT));
+      return Promise.reject(new Error(SESSION_UNAVAILABLE));
+    }
   }
   return fetch(input, init);
 };
