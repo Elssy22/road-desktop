@@ -294,6 +294,11 @@ button {
   min-width: 0;
 }
 
+/* Données d'une période précédente affichées le temps de lire la nouvelle. */
+.is-pending {
+  opacity: 0.55;
+}
+
 @media (max-width: 900px) {
   .columns {
     grid-template-columns: minmax(0, 1fr);

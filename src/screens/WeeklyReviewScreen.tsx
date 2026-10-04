@@ -72,7 +72,9 @@ export function WeeklyReviewScreen({ userId }: { userId: string }) {
     ]);
     return { done, overdue, projects: projects.filter((p) => p.status === 'actif'), goals: goals.goals, nextWeekDates };
   }, [userId, week, nextWeek, today]);
-  const { data, error } = useRemoteQuery(load, EMPTY);
+  // Changement de semaine : les chiffres de la semaine précédente restent affichés,
+  // atténués, jusqu'à la réponse.
+  const { data, error, loading } = useRemoteQuery(load, EMPTY);
 
   const weekTitle =
     week === currentWeek ? 'Cette semaine' : week === addDays(currentWeek, -7) ? 'Semaine dernière' : 'Semaine';
@@ -112,7 +114,7 @@ export function WeeklyReviewScreen({ userId }: { userId: string }) {
         </div>
       </Panel>
 
-      <div className="columns">
+      <div className={loading ? 'columns is-pending' : 'columns'} aria-busy={loading}>
         <div className="columns__main">
           <CategoryCard category="tasks" icon={CheckCheck} title="Tâches terminées" count={data.done.length}>
             {data.done.length === 0 ? (
