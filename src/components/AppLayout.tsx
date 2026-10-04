@@ -16,11 +16,12 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { matchPath, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useSession } from '../auth/SessionProvider';
-import { supabase } from '../lib/supabase';
+import { useSignOut } from '../auth/useSignOut';
+import { ErrorBoundary } from './ErrorBoundary';
 import { SearchField } from './SearchField';
 
 type Section = {
@@ -98,13 +99,7 @@ const linkClass = (active: boolean, sub = false) =>
 export function AppLayout() {
   const { session } = useSession();
   const { pathname } = useLocation();
-  const [busy, setBusy] = useState(false);
-
-  const signOut = async () => {
-    setBusy(true);
-    await supabase.auth.signOut();
-    setBusy(false);
-  };
+  const { signOut, busy, error: signOutError } = useSignOut();
 
   return (
     <div className="shell">
@@ -151,10 +146,18 @@ export function AppLayout() {
             <LogOut size={18} />
             Se déconnecter
           </button>
+          {signOutError && (
+            <p className="sidebar__error" role="alert">
+              {signOutError}
+            </p>
+          )}
         </div>
       </nav>
       <main className="content">
-        <Outlet />
+        {/* Clé = route : changer d'écran efface l'erreur d'un écran précédent. */}
+        <ErrorBoundary key={pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );

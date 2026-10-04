@@ -29,11 +29,27 @@ export type Task = {
 
 const TASKS = 'tasks';
 
-/** Toutes les tâches vivantes, les plus récentes d'abord. */
-export const listTasks = (): Promise<Task[]> =>
-  fetchAll<Task>((from, to) =>
-    supabase.from(TASKS).select('*').is('deleted_at', null).order('created_at', { ascending: false }).range(from, to)
+/** Les tâches terminées plus anciennes ne sont pas chargées (section « Terminées »). */
+const DONE_TASKS_DAYS = 30;
+
+/**
+ * Tâches vivantes à faire, et terminées depuis moins de DONE_TASKS_DAYS jours,
+ * les plus récentes d'abord. `id` en dernier : un tri unique garde une
+ * pagination stable au-delà de 1000 lignes.
+ */
+export const listTasks = (): Promise<Task[]> => {
+  const doneSince = new Date(Date.now() - DONE_TASKS_DAYS * 86_400_000).toISOString();
+  return fetchAll<Task>((from, to) =>
+    supabase
+      .from(TASKS)
+      .select('*')
+      .is('deleted_at', null)
+      .or(`done.eq.false,updated_at.gte.${doneSince}`)
+      .order('created_at', { ascending: false })
+      .order('id')
+      .range(from, to)
   );
+};
 
 /** Titres des tâches vivantes `ids` (pour les rappels liés). */
 export async function taskTitles(ids: string[]): Promise<Map<string, string>> {

@@ -54,6 +54,7 @@ export const listTasksDoneBetween = (from: DateKey, to: DateKey): Promise<Task[]
       .gte('updated_at', fromDateKey(from).toISOString())
       .lt('updated_at', fromDateKey(to).toISOString())
       .order('updated_at', { ascending: false })
+      .order('id')
       .range(a, b)
   );
 
@@ -69,5 +70,6 @@ export const listOverdueTasks = (today: DateKey): Promise<Task[]> =>
       .lt('due_date', today)
       .order('due_date')
       .order('priority', { ascending: false })
+      .order('id')
       .range(a, b)
   );

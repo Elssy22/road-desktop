@@ -54,6 +54,7 @@ export async function listRemindersBetween(from: DateKey, to: DateKey): Promise<
       .lt('remind_at', endOfDayIso(to))
       .order('remind_at')
       .order('created_at')
+      .order('id')
       .range(a, b)
   );
   return withLinks(rows);
@@ -70,6 +71,7 @@ export async function listOpenRemindersUntil(day: DateKey): Promise<ReminderWith
       .lt('remind_at', endOfDayIso(day))
       .order('remind_at')
       .order('created_at')
+      .order('id')
       .range(a, b)
   );
   return withLinks(rows);
@@ -86,6 +88,7 @@ export async function listOpenRemindersForContact(contactId: string): Promise<Re
       .eq('contact_id', contactId)
       .order('remind_at')
       .order('created_at')
+      .order('id')
       .range(a, b)
   );
   return withLinks(rows);

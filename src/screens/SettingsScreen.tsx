@@ -3,9 +3,19 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useSession } from '../auth/SessionProvider';
-import { CardList, CardNote, CategoryCard, ListRow, ScreenHeader, SegmentedControl, TextAction } from '../components/ui';
+import { useSignOut } from '../auth/useSignOut';
+import {
+  CardList,
+  CardNote,
+  CategoryCard,
+  ErrorBanner,
+  ListRow,
+  ScreenHeader,
+  SegmentedControl,
+  TextAction,
+} from '../components/ui';
 import { notifyDataChanged } from '../data/base';
-import { supabase } from '../lib/supabase';
+import { PROSPECT_RETENTION_YEARS } from '../lib/crmRetention';
 import { getAppearancePreference, setAppearancePreference, type AppearancePreference } from '../theme/cssVars';
 import { ResetPasswordScreen } from './ResetPasswordScreen';
 
@@ -46,17 +56,11 @@ export function SettingsScreen() {
   const { session } = useSession();
   const online = useOnline();
   const [appearance, setAppearance] = useState(getAppearancePreference);
-  const [busy, setBusy] = useState(false);
+  const { signOut, busy, error: signOutError } = useSignOut();
 
   const changeAppearance = (value: AppearancePreference) => {
     setAppearancePreference(value);
     setAppearance(value);
-  };
-
-  const signOut = async () => {
-    setBusy(true);
-    await supabase.auth.signOut();
-    setBusy(false);
   };
 
   return (
@@ -102,7 +106,7 @@ export function SettingsScreen() {
           <CardList>
             <ListRow
               title="Purge RGPD des prospects"
-              subtitle="Prospects inactifs depuis 3 ans, à supprimer avec confirmation"
+              subtitle={`Prospects inactifs depuis ${PROSPECT_RETENTION_YEARS} ans, à supprimer avec confirmation`}
               onClick={() => navigate('/agency/prospect-purge')}
             />
           </CardList>
@@ -118,6 +122,7 @@ export function SettingsScreen() {
               Se déconnecter
             </button>
           </div>
+          <ErrorBanner message={signOutError} />
         </CategoryCard>
 
         <CategoryCard category="keyDates" icon={Smartphone} title="Sur le mobile">

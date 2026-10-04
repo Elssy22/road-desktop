@@ -74,13 +74,29 @@ export async function insertRow(
   return id;
 }
 
+/** Message quand la ligne visée n'existe plus (supprimée depuis le mobile pendant l'édition, par ex.). */
+export const ROW_GONE = 'Cet élément a été supprimé entre-temps (peut-être depuis le mobile) : rien n’a été enregistré.';
+
+/**
+ * Met à jour une ligne vivante. Lève ROW_GONE si aucune ligne n'a été touchée :
+ * sans ce contrôle, PostgREST répond « succès » pour 0 ligne modifiée.
+ */
 export async function updateRow(table: string, id: string, patch: Record<string, unknown>) {
-  unwrap(await supabase.from(table).update({ ...patch, updated_at: new Date().toISOString() }).eq('id', id));
+  const rows = unwrap(
+    await supabase
+      .from(table)
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .is('deleted_at', null)
+      .select('id')
+  );
   notifyDataChanged();
+  if (rows.length === 0) throw new Error(ROW_GONE);
 }
 
+/** Suppression logique ; une ligne déjà supprimée ailleurs n'est pas une erreur. */
 export async function softDeleteRow(table: string, id: string) {
   const ts = new Date().toISOString();
-  unwrap(await supabase.from(table).update({ deleted_at: ts, updated_at: ts }).eq('id', id));
+  unwrap(await supabase.from(table).update({ deleted_at: ts, updated_at: ts }).eq('id', id).is('deleted_at', null));
   notifyDataChanged();
 }

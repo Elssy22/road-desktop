@@ -52,6 +52,7 @@ export async function listAppointmentsBetween(from: DateKey, to: DateKey): Promi
       .lt('start_at', endOfDayIso(to))
       .order('start_at')
       .order('created_at')
+      .order('id')
       .range(a, b)
   );
   const names = await contactNames(rows.flatMap((r) => (r.contact_id ? [r.contact_id] : [])));
