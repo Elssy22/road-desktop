@@ -1274,6 +1274,12 @@ button {
   color: var(--color-danger);
 }
 
+.form-field__hint {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
 /* Champ blanc sur le fond pastel d'une carte. */
 .input {
   width: 100%;

@@ -9,7 +9,8 @@ import { addDocument, listDocuments, type DocumentWithLinks } from '../../data/d
 import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { formatEditedLabel } from '../../lib/dates';
-import { encryptDocument, isVaultUnlocked, lockVault } from '../../lib/vault';
+import { useVaultLock } from '../../lib/useVaultLock';
+import { encryptDocument } from '../../lib/vault';
 import { checkFileSize, readPickedFile, uploadEncrypted } from '../../lib/vaultFiles';
 import { useToday } from '../../lib/useToday';
 
@@ -39,17 +40,11 @@ export function VaultScreen({ userId }: { userId: string }) {
   const navigate = useNavigate();
   const today = useToday();
   const { data, error: loadError, loading } = useRemoteQuery(loadLists, EMPTY);
-  const [unlocked, setUnlocked] = useState(() => isVaultUnlocked(userId));
   const [draft, setDraft] = useState<Draft | null>(null);
   const [step, setStep] = useState<Step | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
-
-  const lock = () => {
-    lockVault(userId);
-    setUnlocked(false);
-    setDraft(null);
-  };
+  const { unlocked, markUnlocked, lock } = useVaultLock(userId, () => setDraft(null));
 
   const onPicked = useCallback((file: File | undefined) => {
     setError(null);
@@ -119,7 +114,7 @@ export function VaultScreen({ userId }: { userId: string }) {
       <div className="stack">
         {/* Coffre : cartes menthe, comme sa carte du menu Agence (DECISIONS.md §29-30). */}
         {!unlocked ? (
-          <VaultPassphrasePanel userId={userId} onUnlocked={() => setUnlocked(true)} />
+          <VaultPassphrasePanel userId={userId} onUnlocked={markUnlocked} />
         ) : (
           draft && (
             <CategoryCard category="reminders" icon={FilePlus} title="Nouveau document">

@@ -89,12 +89,54 @@ async function deriveKey(userId: string, passphrase: string, iterations: number)
 
 const session = new Map<string, { key: CryptoKey; iterations: number }>();
 
+/** Verrouillage automatique après ce délai sans clic ni frappe dans l'app. */
+const AUTO_LOCK_MS = 10 * 60 * 1000;
+let idleTimer: ReturnType<typeof setTimeout> | null = null;
+const lockListeners = new Set<() => void>();
+
 export const isVaultUnlocked = (userId: string) => session.has(userId);
-export const lockVault = (userId: string) => session.delete(userId);
+
+/** Prévient les écrans ouverts que le coffre vient d'être verrouillé (à la main ou automatiquement). */
+export function onVaultLocked(listener: () => void): () => void {
+  lockListeners.add(listener);
+  return () => {
+    lockListeners.delete(listener);
+  };
+}
+
+function lockAll() {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = null;
+  if (session.size === 0) return;
+  session.clear();
+  for (const l of lockListeners) l();
+}
+
+export function lockVault(userId: string) {
+  if (!session.delete(userId)) return;
+  if (session.size === 0 && idleTimer) clearTimeout(idleTimer);
+  for (const l of lockListeners) l();
+}
+
+/** Relance le compte à rebours d'inactivité tant qu'une clé est en mémoire. */
+function armAutoLock() {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = session.size > 0 ? setTimeout(lockAll, AUTO_LOCK_MS) : null;
+}
+
+// Coffre ouvert indéfiniment = risque si le Mac reste allumé sans surveillance :
+// verrouillage après AUTO_LOCK_MS d'inactivité, et dès que la fenêtre est
+// masquée (réduite, Mac en veille ou écran verrouillé).
+for (const event of ['pointerdown', 'keydown'] as const) {
+  window.addEventListener(event, () => session.size > 0 && armAutoLock(), { passive: true, capture: true });
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') lockAll();
+});
 
 // Déconnexion (ou session expirée) : plus aucune clé en mémoire.
 supabase.auth.onAuthStateChange((event) => {
-  if (event === 'SIGNED_OUT') session.clear();
+  if (event === 'SIGNED_OUT') lockAll();
 });
 
 /**
@@ -116,6 +158,23 @@ export function passphraseProblem(passphrase: string, confirmation: string): str
   if (passphrase.length < MIN_PASSPHRASE_LENGTH) return `Au moins ${MIN_PASSPHRASE_LENGTH} caractères.`;
   if (passphrase !== confirmation) return 'Les deux saisies ne correspondent pas.';
   return null;
+}
+
+export type PassphraseStrength = 'faible' | 'moyenne' | 'bonne';
+
+/**
+ * Estimation grossière de la robustesse (longueur et variété des caractères),
+ * affichée à la création. Indicative seulement : une phrase déjà choisie sur
+ * le mobile doit rester acceptée telle quelle. Avec 20 000 itérations PBKDF2
+ * (imposées par le format partagé avec le mobile), seule une phrase longue
+ * résiste à une attaque hors ligne sur le hash de vérification.
+ */
+export function passphraseStrength(passphrase: string): PassphraseStrength {
+  const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^\p{L}\p{N}]/u].filter((r) => r.test(passphrase)).length;
+  const words = passphrase.trim().split(/\s+/).filter(Boolean).length;
+  if (passphrase.length >= 20 && (words >= 4 || classes >= 3)) return 'bonne';
+  if (passphrase.length >= 14 && (words >= 3 || classes >= 2)) return 'moyenne';
+  return 'faible';
 }
 
 /**
@@ -160,6 +219,7 @@ export async function setupVault(userId: string, passphrase: string) {
   const config: VaultConfig = { v: 1, iterations: KDF_ITERATIONS, verifier };
   localStorage.setItem(configKey(userId), JSON.stringify(config));
   session.set(userId, { key, iterations: KDF_ITERATIONS });
+  armAutoLock();
 }
 
 /** Lève « Phrase secrète incorrecte » si le hash ne correspond pas. */
@@ -169,6 +229,7 @@ export async function unlockVault(userId: string, passphrase: string) {
   const { key, verifier } = await deriveKey(userId, passphrase, config.iterations);
   if (verifier !== config.verifier) throw new Error('Phrase secrète incorrecte.');
   session.set(userId, { key, iterations: config.iterations });
+  armAutoLock();
 }
 
 /** Oublie la phrase sur cet appareil (les documents chiffrés ne sont pas touchés). */

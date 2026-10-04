@@ -8,7 +8,8 @@ import { VaultPassphrasePanel } from '../../components/VaultPassphrasePanel';
 import { getDocument, softDeleteDocument, type DocumentWithLinks } from '../../data/documents';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { formatEditedLabel } from '../../lib/dates';
-import { decryptDocument, isVaultUnlocked, lockVault, type DocumentMeta } from '../../lib/vault';
+import { useVaultLock } from '../../lib/useVaultLock';
+import { decryptDocument, type DocumentMeta } from '../../lib/vault';
 import { canPreview, decryptedUrl, downloadEncrypted, removeEncrypted, saveDecrypted } from '../../lib/vaultFiles';
 import { useToday } from '../../lib/useToday';
 
@@ -31,21 +32,15 @@ function VaultDocument({ id, userId }: { id: string; userId: string }) {
   const { confirm, dialog } = useConfirm();
   const load = useCallback(() => getDocument(id), [id]);
   const { data: doc, error: loadError, loading } = useRemoteQuery<DocumentWithLinks | null>(load, null);
-  const [unlocked, setUnlocked] = useState(() => isVaultUnlocked(userId));
   const [step, setStep] = useState<'downloading' | 'decrypting' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [opened, setOpened] = useState<Opened | null>(null);
+  const { unlocked, markUnlocked, lock } = useVaultLock(userId, () => setOpened(null));
 
   // Le clair ne vit qu'en mémoire : l'URL blob est révoquée dès qu'elle n'est plus affichée.
   useEffect(() => () => {
     if (opened) URL.revokeObjectURL(opened.url);
   }, [opened]);
-
-  const lock = () => {
-    lockVault(userId);
-    setUnlocked(false);
-    setOpened(null);
-  };
 
   const open = async () => {
     if (!doc || step) return;
@@ -129,7 +124,7 @@ function VaultDocument({ id, userId }: { id: string; userId: string }) {
         </CategoryCard>
 
         {!unlocked ? (
-          <VaultPassphrasePanel userId={userId} onUnlocked={() => setUnlocked(true)} />
+          <VaultPassphrasePanel userId={userId} onUnlocked={markUnlocked} />
         ) : step ? (
           <p className="loading-note">{step === 'downloading' ? 'Téléchargement…' : 'Déchiffrement…'}</p>
         ) : opened ? (

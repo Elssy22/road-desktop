@@ -1,7 +1,14 @@
 import { KeyRound, Lock } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
-import { getVaultConfig, passphraseProblem, resetVaultOnDevice, setupVault, unlockVault } from '../lib/vault';
+import {
+  getVaultConfig,
+  passphraseProblem,
+  passphraseStrength,
+  resetVaultOnDevice,
+  setupVault,
+  unlockVault,
+} from '../lib/vault';
 import { useConfirm } from './Dialog';
 import { FormField, Panel } from './ui';
 
@@ -20,6 +27,7 @@ export function VaultPassphrasePanel({ userId, onUnlocked }: { userId: string; o
   const [error, setError] = useState<string | null>(null);
 
   const problem = configured ? null : passphraseProblem(passphrase, confirmation);
+  const strength = passphraseStrength(passphrase);
   const canSubmit = !busy && passphrase.length > 0 && (configured || (!problem && understood));
 
   const submit = async (e: FormEvent) => {
@@ -77,7 +85,7 @@ export function VaultPassphrasePanel({ userId, onUnlocked }: { userId: string; o
         {!configured && (
           <div className="vault-warning">
             <p className="vault-warning__title">
-              ⚠️ Si vous oubliez cette phrase, les documents chiffrés sont perdus définitivement, sans récupération
+              ⚠️ Si tu oublies cette phrase, les documents chiffrés sont perdus définitivement, sans récupération
               possible.
             </p>
             <p className="dialog__message">
@@ -96,7 +104,14 @@ export function VaultPassphrasePanel({ userId, onUnlocked }: { userId: string; o
             onChange={(e) => setPassphrase(e.target.value)}
             placeholder={configured ? 'Phrase secrète' : '10 caractères min.'}
             autoFocus
+            aria-describedby={!configured && passphrase ? 'vault-strength' : undefined}
           />
+          {!configured && passphrase.length > 0 && (
+            <span id="vault-strength" className="form-field__hint">
+              Robustesse : {strength}
+              {strength !== 'bonne' && ' — préfère une phrase de 4 mots ou plus (20 caractères et plus).'}
+            </span>
+          )}
         </FormField>
         {!configured && (
           <>
