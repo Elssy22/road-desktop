@@ -19,6 +19,7 @@ import {
 import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
+import { changedFields } from '../../data/base';
 import { formatDueLabel, type DateKey } from '../../lib/dates';
 import { amountToInput, parseAmount } from '../../lib/money';
 import { useToday } from '../../lib/useToday';
@@ -116,7 +117,7 @@ function MoneyForm({ id }: { id?: string }) {
     const fields = { ...form, label: form.label.trim(), amount };
     setSaving(true);
     const ok = await run(async () => {
-      if (item) await updateMoneyItem(item.id, fields);
+      if (item) await updateMoneyItem(item.id, changedFields(item, fields));
       else await addMoneyItem(fields);
     });
     setSaving(false);

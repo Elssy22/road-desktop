@@ -17,6 +17,7 @@ import { listProjects, type ProjectWithProgress } from '../data/projects';
 import { formatTimeOfDay } from '../data/reminders';
 import { useRemoteQuery } from '../data/useRemoteQuery';
 import { useWrite } from '../data/useWrite';
+import { changedFields } from '../data/base';
 import { canSearchAddress, searchAddress, type AddressSuggestion } from '../lib/addressSearch';
 import { formatDueLabel, fromDateKey, toDateKey, type DateKey } from '../lib/dates';
 import { useToday } from '../lib/useToday';
@@ -175,7 +176,7 @@ function AppointmentForm({ id }: { id?: string }) {
     };
     setSaving(true);
     const ok = await run(async () => {
-      if (appointment) await updateAppointment(appointment.id, fields);
+      if (appointment) await updateAppointment(appointment.id, changedFields(appointment, fields));
       else await addAppointment(fields);
     });
     setSaving(false);

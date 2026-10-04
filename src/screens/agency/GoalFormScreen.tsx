@@ -28,6 +28,7 @@ import {
 import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
+import { changedFields } from '../../data/base';
 import { CA_PERIODS, caPeriodBounds, caProgress, formatCaPeriod, formatEuros, type CaPeriod, type GoalKind } from '../../lib/caGoals';
 import type { DateKey } from '../../lib/dates';
 import { amountToInput, parseAmount } from '../../lib/money';
@@ -154,7 +155,7 @@ function GoalForm({ id, userId }: { id?: string; userId: string }) {
     };
     setSaving(true);
     const ok = await run(async () => {
-      if (goal) await updateGoal(goal.id, fields);
+      if (goal) await updateGoal(goal.id, changedFields(goal, fields));
       else await addGoal(fields);
     });
     setSaving(false);

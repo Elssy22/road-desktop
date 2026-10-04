@@ -16,6 +16,7 @@ import {
 import { listTasks, type Task } from '../data/tasks';
 import { useRemoteQuery } from '../data/useRemoteQuery';
 import { useWrite } from '../data/useWrite';
+import { changedFields } from '../data/base';
 import { formatDueLabel, fromDateKey, toDateKey, type DateKey } from '../lib/dates';
 import { useToday } from '../lib/useToday';
 
@@ -128,7 +129,7 @@ function ReminderForm({ id }: { id?: string }) {
     setSaving(true);
     const ok = await run(async () => {
       // Heure modifiée vers le futur : le rappel redevient « à faire ».
-      if (reminder) await updateReminder(reminder.id, inPast ? fields : { ...fields, done: false });
+      if (reminder) await updateReminder(reminder.id, changedFields(reminder, inPast ? fields : { ...fields, done: false }));
       else await addReminder({ ...fields, done: false });
     });
     setSaving(false);

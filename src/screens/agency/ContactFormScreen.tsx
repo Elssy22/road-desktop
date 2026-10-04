@@ -26,6 +26,7 @@ import {
   type PipelineStage,
 } from '../../data/crm';
 import { useWrite } from '../../data/useWrite';
+import { changedFields } from '../../data/base';
 import type { DateKey } from '../../lib/dates';
 import { amountToInput, parseAmount } from '../../lib/money';
 
@@ -140,7 +141,7 @@ function ContactForm({ id }: { id?: string }) {
     setSaving(true);
     let savedId = contact?.id ?? null;
     const ok = await run(async () => {
-      if (contact) await updateContact(contact.id, fields);
+      if (contact) await updateContact(contact.id, changedFields(contact, fields));
       else savedId = await addContact(fields);
     });
     setSaving(false);

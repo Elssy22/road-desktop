@@ -16,6 +16,7 @@ import {
 } from '../../data/keyDates';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
+import { changedFields } from '../../data/base';
 import { formatDueLabel, type DateKey } from '../../lib/dates';
 import { useToday } from '../../lib/useToday';
 
@@ -92,7 +93,7 @@ function KeyDateForm({ id }: { id?: string }) {
     };
     setSaving(true);
     const ok = await run(async () => {
-      if (keyDate) await updateKeyDate(keyDate.id, fields);
+      if (keyDate) await updateKeyDate(keyDate.id, changedFields(keyDate, fields));
       else await addKeyDate(fields);
     });
     setSaving(false);
