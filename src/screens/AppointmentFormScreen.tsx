@@ -1,9 +1,10 @@
-import { CalendarDays, ExternalLink, Link2, MapPin, NotebookPen, Search } from 'lucide-react';
+import { CalendarDays, Link2, MapPin, NotebookPen, Search } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { useConfirm } from '../components/Dialog';
 import { ContactSelect } from '../components/ContactSelect';
+import { ExternalLinkAction } from '../components/ExternalLinkAction';
 import { CardList, CardNote, CategoryCard, ErrorBanner, FormField, ScreenHeader, TextAction } from '../components/ui';
 import {
   addAppointment,
@@ -373,10 +374,7 @@ function AppointmentForm({ id }: { id?: string }) {
                       disabled={searchingAddress}
                     />
                   )}
-                  <a className="text-action text-action--tinted" href={directionsUrl} target="_blank" rel="noreferrer">
-                    <ExternalLink size={16} />
-                    Itinéraire
-                  </a>
+                  <ExternalLinkAction href={directionsUrl} label="Itinéraire" />
                 </div>
               )}
             </div>

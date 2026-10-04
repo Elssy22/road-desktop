@@ -1,7 +1,8 @@
-import { Copy, EyeOff, ExternalLink, RefreshCw, Search, Send, SlidersHorizontal, Sparkles, Star, type LucideIcon } from 'lucide-react';
+import { Copy, EyeOff, RefreshCw, Search, Send, SlidersHorizontal, Sparkles, Star, type LucideIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { ExternalLinkAction } from '../../components/ExternalLinkAction';
 import { Badge, CardList, CardNote, CategoryCard, Chip, ChipRow, ErrorBanner, ScreenHeader, TextAction } from '../../components/ui';
 import { notifyDataChanged } from '../../data/base';
 import {
@@ -224,10 +225,7 @@ function TenderRow({
         </select>
         {offer.url && (
           <>
-            <a className="text-action text-action--tinted" href={offer.url} target="_blank" rel="noreferrer">
-              <ExternalLink size={16} />
-              Voir l’avis
-            </a>
+            <ExternalLinkAction href={offer.url} label="Voir l’avis" />
             <TextAction
               label={copied ? 'Lien copié' : 'Copier le lien'}
               icon={Copy}
