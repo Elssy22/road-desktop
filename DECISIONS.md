@@ -1796,3 +1796,94 @@ de commande avec `xcodebuild`, donc indépendant de notre configuration). Xcode 
 - Pas propre au mode développement : le scénario touche aussi l'app compilée. Le HMR de Vite
   pouvait en plus créer un second client en `tauri dev` si `lib/supabase.ts` était réévalué ;
   le client est désormais unique par fenêtre (`globalThis`).
+
+## 37. Desktop — fin du lot correctif (finitions de l'audit, outillage)
+
+### I14 — changement de mot de passe sans l'actuel : action manuelle
+
+- Le réglage ne se pilote **pas depuis l'app** : c'est une option de Supabase Auth, côté
+  projet, que la clé anon ne peut pas modifier. Le dépôt n'a pas de `supabase/config.toml`
+  (projet non géré par `supabase config push`), donc rien à changer dans le code non plus.
+- **À faire par Landry** : dashboard Supabase › Authentication › Sign In / Providers › Email ›
+  activer **« Secure password change »**. Équivalents si besoin : `secure_password_change = true`
+  sous `[auth.email]` dans `config.toml`, ou le champ
+  `security_update_password_require_reauthentication` de l'API Management (`/config/auth`).
+  Noms relevés de mémoire, la documentation Supabase n'ayant pas pu être consultée pendant ce
+  lot : se fier à l'intitulé du dashboard.
+- Effet attendu : une session **ouverte depuis plus de 24 h** ne peut plus changer le mot de
+  passe sans confirmation ; `updateUser` répond `reauthentication_needed`, que
+  `ResetPasswordScreen` traite déjà (message : se déconnecter puis « Mot de passe oublié »).
+  Une session récente (moins de 24 h) le peut toujours sans redonner l'actuel : c'est le
+  comportement de Supabase, on n'ajoute pas de contrôle maison côté client (une vérification
+  du mot de passe actuel dans la webview se contourne en appelant l'API directement).
+- Amélioration possible plus tard : le parcours officiel `auth.reauthenticate()` (code reçu
+  par e-mail) puis `updateUser({ password, nonce })`, au lieu de renvoyer vers « Mot de passe
+  oublié ».
+
+### Autres actions manuelles encore ouvertes (rappel du lot B2)
+
+- Dashboard Supabase › Authentication › Sign In / Providers : **désactiver les inscriptions**.
+- `SUMMARIZE_ALLOWED_USER_IDS` défini, puis **redéployer `summarize-meeting`** (elle refuse
+  désormais tout appel si la liste est vide).
+
+### Points mineurs traités dans ce lot
+
+- Sortie des formulaires commune (`lib/useFormExit.ts`) : RDV, rappel, date clé, finances,
+  objectif reviennent à l'écran d'origine (`navigate(-1)`, repli sur la liste sans
+  historique). Retour ne rouvre plus le formulaire Finances / Objectifs après enregistrement.
+- `useRemoteQuery` repassait déjà en `loading` quand `load` change (§36) ; la Revue de la
+  semaine, seul écran à paramètres qui l'ignorait, atténue désormais les chiffres de
+  l'ancienne semaine pendant la lecture (`.is-pending`, `aria-busy`).
+- Import de contacts : fichier refusé au-delà de 10 Mo, avant lecture.
+- Compte-rendu ouvert depuis un RDV (« Faire le compte-rendu ») : daté du début du RDV
+  enregistré (titre de la note, `happened_at` de l'interaction). Ouvert ailleurs, il reste
+  daté de la saisie (pas de RDV connu).
+- Code mort : `lib/crmFollowups.ts` réduit aux étapes et titres (seul `autoTaskTitle` sert,
+  pour les tâches posées par l'import) ; `planFollowups` reste propre au mobile.
+  `useUserId` et `alertColor` avaient déjà disparu. `@tauri-apps/api` est **gardée** :
+  `@tauri-apps/plugin-opener` l'importe, et la CLI Tauri compare sa version à celle du crate.
+
+### ESLint + Prettier
+
+- `eslint.config.js` : recommandé JS + `typescript-eslint`, `react-hooks/rules-of-hooks`
+  (erreur) et `exhaustive-deps` (avertissement), `eslint-config-prettier`. Ignorés :
+  `mobile-legacy/`, `supabase/` (Deno), `src-tauri/`.
+- `.prettierrc.json` : guillemets simples, 120 colonnes, virgules finales « es5 », soit le
+  style existant (le premier passage n'a touché que ~500 lignes, commit `style:` isolé).
+- Scripts : `npm run lint`, `npm run format`, `npm run format:check`. À lancer avant chaque
+  commit d'un lot ; pas de hook git imposé.
+
+### Nettoyage des tâches deck de l'import (B1) : soft-delete vérifié dans le code
+
+- `scripts/cleanup-import-tasks.ts` n'utilise que `update({ deleted_at })` sur les tâches
+  deck ouvertes, un `upsert` de tâches **déjà supprimées** (`deleted_at` posé,
+  `ignoreDuplicates`) et un `update` de `stage_changed_at` sur les contacts. Aucun `.delete()`
+  ni `DELETE` dans `scripts/` ni `src/`, dans tout l'historique git.
+- Le rapport `claude_cleanup_import_tasks.json`, écrit à chaque lancement, n'existe pas dans ce
+  dossier : l'exécution elle-même n'est pas vérifiable d'ici. Contrôle côté base (éditeur SQL) :
+  `select count(*) from tasks where auto_kind = 'deck' and deleted_at >= '2026-10-04';`
+  doit compter au moins les 279 tâches retirées (plus les tâches posées déjà supprimées).
+
+### État de l'audit
+
+- Traités : B1, B2, B3 ; I1 à I13, I15 à I18 ; I14 côté code (reste le réglage Supabase) ;
+  factorisations `ContactSelect`, erreurs et montants ; mineurs ci-dessus.
+- **Volontairement non traités**, à reprendre dans un lot « dette » si le besoin se confirme :
+  - PBKDF2 à 20 000 itérations (I12, partie migration) : format partagé avec le mobile, à
+    migrer ensemble ;
+  - finitions design restantes de l'audit (points de rupture calculés sur la fenêtre,
+    contrastes du bouton danger en sombre et des contours de champ, tailles et rayons hors
+    jetons, doublons `.gradient-button` / `.button--primary`) : à juger à l'écran sur le Mac,
+    l'app n'ayant pas été lancée ici. Déjà réglés au lot précédent : défilement de la barre
+    latérale, focus visible, focus initial sur « Annuler » dans les confirmations ;
+  - factorisations restantes (`useRecordOnce`, case à cocher, navigation de période,
+    accès `localStorage`), nommage `insert*` / `fetch*` / `load*` ;
+  - ~25 exports utilisés seulement dans leur fichier : sans effet, et plusieurs fichiers
+    `lib/` sont des copies du mobile qu'on évite de faire diverger ;
+  - types `Database` générés, `noUncheckedIndexedAccess` ;
+  - `QuickAddTask` qui vide le champ avant la fin de l'écriture, courses `addStep` /
+    `moveStep`, purge de prospects sans progression, cas limites du parseur CSV, brouillon de
+    compte-rendu en clair dans `localStorage` ;
+  - Supabase : `qonto_id` unique global au lieu de `(user_id, qonto_id)`, `search_path` des
+    fonctions de trigger, UPDATE de toutes les colonnes de `tender_offers` (migrations
+    partagées avec le mobile).
