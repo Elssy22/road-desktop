@@ -1,4 +1,4 @@
-import { AlarmClock, Plus, Users } from 'lucide-react';
+import { AlarmClock, FileUp, Plus, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import {
   ListRow,
   ScreenHeader,
   SegmentedControl,
+  TextAction,
 } from '../../components/ui';
 import { listContacts, SEGMENT_LABELS, SEGMENTS, segmentLabel, type ContactSegment, type ContactWithLast } from '../../data/crm';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
@@ -68,7 +69,12 @@ export function ContactsScreen() {
       <ScreenHeader
         eyebrow="Agence"
         title="Contacts"
-        action={<GradientButton label="Contact" icon={Plus} onClick={() => navigate('/agency/contacts/new')} />}
+        action={
+          <div className="header-actions">
+            <TextAction label="Importer un fichier" icon={FileUp} onClick={() => navigate('/agency/contacts/import')} />
+            <GradientButton label="Contact" icon={Plus} onClick={() => navigate('/agency/contacts/new')} />
+          </div>
+        }
       />
       <ErrorBanner message={error} />
       <div className="stack">

@@ -7,6 +7,7 @@ import { AppLayout } from './components/AppLayout';
 import { AgencyScreen } from './screens/agency/AgencyScreen';
 import { ContactDetailScreen } from './screens/agency/ContactDetailScreen';
 import { ContactFormScreen } from './screens/agency/ContactFormScreen';
+import { ContactImportScreen } from './screens/agency/ContactImportScreen';
 import { ContactsScreen } from './screens/agency/ContactsScreen';
 import { GoalFormScreen } from './screens/agency/GoalFormScreen';
 import { GoalsScreen } from './screens/agency/GoalsScreen';
@@ -72,6 +73,7 @@ function Root() {
           <Route path="/agency" element={<AgencyScreen userId={session.user.id} />} />
           <Route path="/agency/contacts" element={<ContactsScreen />} />
           <Route path="/agency/contacts/new" element={<ContactFormScreen />} />
+          <Route path="/agency/contacts/import" element={<ContactImportScreen />} />
           <Route path="/agency/contacts/:id" element={<ContactDetailScreen />} />
           <Route path="/agency/contacts/:id/edit" element={<ContactFormScreen />} />
           <Route path="/agency/pipeline" element={<PipelineScreen />} />

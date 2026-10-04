@@ -1399,6 +1399,52 @@ button {
   gap: var(--space-sm);
 }
 
+/* --- Import de contacts (CSV / XLSX) --- */
+
+/* Aperçu : tableau blanc défilant horizontalement dans la carte. */
+.import-preview {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+}
+
+.import-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.import-preview th,
+.import-preview td {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.import-preview th {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.import-preview tr:last-child td {
+  border-bottom: none;
+}
+
+.import-preview__notes {
+  min-width: 260px;
+  white-space: pre-line;
+  color: var(--color-text-muted);
+}
+
+.import-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
 /* Titre de tâche suggérée, modifiable sur place. */
 .inline-input {
   width: 100%;

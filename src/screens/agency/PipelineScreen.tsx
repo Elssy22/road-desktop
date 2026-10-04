@@ -1,4 +1,4 @@
-import { Plus, ShieldCheck, TrendingUp } from 'lucide-react';
+import { FileUp, Plus, ShieldCheck, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -88,6 +88,7 @@ export function PipelineScreen() {
         action={
           <div className="header-actions">
             <TextAction label="Purge RGPD" icon={ShieldCheck} onClick={() => navigate('/agency/prospect-purge')} />
+            <TextAction label="Importer un fichier" icon={FileUp} onClick={() => navigate('/agency/contacts/import')} />
             <GradientButton label="Contact" icon={Plus} onClick={() => navigate('/agency/contacts/new')} />
           </div>
         }
