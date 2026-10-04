@@ -123,6 +123,7 @@ export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' 
           className="field"
           type="email"
           placeholder="Email"
+          aria-label="Email"
           autoComplete="email"
           autoCapitalize="none"
           spellCheck={false}
@@ -135,6 +136,7 @@ export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' 
             className="field"
             type="password"
             placeholder="Mot de passe"
+            aria-label="Mot de passe"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

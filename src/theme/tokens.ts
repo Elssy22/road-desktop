@@ -129,6 +129,8 @@ export type Palette = {
   /** Texte et icônes sur le dégradé (blanc dans les deux modes). */
   onGradient: string;
   danger: string;
+  /** Texte d'un bouton sur `danger`. */
+  onDanger: string;
   /** Échéances clés (= `tints.butter.fg`). */
   warning: string;
   /** Rappels (= `tints.mint.fg`). */
@@ -147,17 +149,21 @@ export const lightPalette: Palette = {
   border: '#DDE4EE',
   text: '#1F2433',
   textMuted: '#5A6275',
-  textFaint: '#868EA0',
-  primary: '#C4541D',
+  // Contrastes WCAG AA (≥ 4,5:1) vérifiés au lot correctif (DECISIONS.md §36) :
+  // textFaint 4,6:1 sur le fond, accent 5:1 sur accentSoft, blanc ≥ 4,9:1 sur
+  // tout le dégradé, warning 5,7:1 sur la teinte butter.
+  textFaint: '#687083',
+  primary: '#A8461A',
   onPrimary: '#FFFFFF',
-  accent: '#C4541D',
+  accent: '#A8461A',
   onAccent: '#FFFFFF',
   accentSoft: '#FDE8DA',
-  gradientStart: '#E8763D',
-  gradientEnd: '#B9421D',
+  gradientStart: '#B85224',
+  gradientEnd: '#9E3A16',
   onGradient: '#FFFFFF',
   danger: '#C7372F',
-  warning: '#8A5E07',
+  onDanger: '#FFFFFF',
+  warning: '#7A5A00',
   success: '#2B7A4D',
   appointment: '#2F5E9E',
   overlay: 'rgba(17, 21, 29, 0.35)',
@@ -165,7 +171,7 @@ export const lightPalette: Palette = {
     peach: { bg: '#FFEBDD', border: '#FADBC6', iconBg: '#FFD6BC', fg: '#A84A1A' },
     sky: { bg: '#E3EEFD', border: '#D0E0F7', iconBg: '#C9DDFA', fg: '#2F5E9E' },
     mint: { bg: '#DEF4E7', border: '#C9EBD7', iconBg: '#BFE8D0', fg: '#2B7A4D' },
-    butter: { bg: '#FDF1D2', border: '#F5E3B3', iconBg: '#F9E1A2', fg: '#B8860B' },
+    butter: { bg: '#FDF1D2', border: '#F5E3B3', iconBg: '#F9E1A2', fg: '#7A5A00' },
     lavender: { bg: '#EEE8FC', border: '#E0D6F7', iconBg: '#DCD0F8', fg: '#6447B0' },
     rose: { bg: '#FDE6EE', border: '#F5D3DF', iconBg: '#F9CCDC', fg: '#A63B63' },
   },
@@ -188,6 +194,8 @@ export const darkPalette: Palette = {
   gradientEnd: '#B4461F',
   onGradient: '#FFFFFF',
   danger: '#F2766C',
+  // Texte sombre sur le rouge clair du mode sombre (6,5:1 ; le blanc n'atteignait que 2,8:1).
+  onDanger: '#2A0E0B',
   warning: '#E9C973',
   success: '#8FD6AE',
   appointment: '#9CC0F0',
@@ -207,7 +215,7 @@ export type ColorScheme = 'light' | 'dark';
 /** Ombres douces (`boxShadow` natif de React Native) ; en sombre, ce sont les filets qui détachent. */
 const lightShadows = {
   card: '0px 4px 16px rgba(31, 45, 80, 0.07)',
-  raised: '0px 6px 16px rgba(196, 84, 29, 0.28)',
+  raised: '0px 6px 16px rgba(168, 70, 26, 0.28)',
 };
 const darkShadows = {
   card: '0px 4px 16px rgba(0, 0, 0, 0.25)',

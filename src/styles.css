@@ -164,6 +164,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+  /* Fenêtre basse (560 px min.) : la barre défile, « Se déconnecter » reste accessible. */
+  overflow-y: auto;
   padding: var(--space-xl) var(--space-md) var(--space-lg);
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
@@ -173,8 +175,10 @@ button {
   padding: 0 var(--space-md);
 }
 
-/* Recherche globale : le champ tient dans la largeur de la barre latérale. */
-.sidebar__search {
+/* Recherche globale : le champ tient dans la largeur de la barre latérale.
+   Sélecteur à deux classes : .search-field, définie plus bas, imposait sinon
+   flex: 1 et min-width: 240px (champ plus large que la colonne). */
+.sidebar .sidebar__search {
   flex: none;
   min-width: 0;
   min-height: 36px;
@@ -1210,6 +1214,14 @@ button {
   outline: none;
 }
 
+/* Champs sans cadre : un contour au clavier remplace l'outline retiré. */
+.priority__input:focus-visible,
+.note-editor__body:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 .search-field__input::placeholder {
   color: var(--color-text-faint);
 }
@@ -1401,7 +1413,7 @@ button {
 }
 
 .button--danger {
-  color: var(--color-on-gradient);
+  color: var(--color-on-danger);
   background: var(--color-danger);
 }
 
