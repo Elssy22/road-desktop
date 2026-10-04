@@ -13,8 +13,15 @@ export type Table = string[][];
 
 export const ACCEPTED_EXTENSIONS = '.csv,.xlsx';
 
+/** Un fichier de prospection de quelques milliers de lignes pèse moins de 1 Mo ; au-delà
+ *  de 10 Mo, c'est presque sûrement le mauvais fichier, lu en entier dans le Webview. */
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+
 /** Lit un fichier .csv ou .xlsx en tableau de chaînes (cellules rognées). */
 export async function readTable(file: File): Promise<Table> {
+  if (file.size > MAX_FILE_BYTES) {
+    throw new Error('Fichier trop lourd (10 Mo maximum) : vérifie que c’est bien le fichier de contacts.');
+  }
   const ext = file.name.toLowerCase().split('.').pop();
   let rows: Table;
   if (ext === 'xlsx') {
