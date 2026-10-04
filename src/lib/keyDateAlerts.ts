@@ -1,4 +1,3 @@
-import type { Palette } from '../theme/tokens';
 import { daysBetween, type DateKey } from './dates';
 
 // Alertes de l'échéancier, calculées côté client : paliers J-90, J-30, J-7
@@ -19,9 +18,6 @@ export function alertLevel(days: number): AlertLevel | null {
   if (days <= 90) return 'j90';
   return null;
 }
-
-export const alertColor = (level: AlertLevel, colors: Palette) =>
-  level === 'j7' ? colors.danger : level === 'j30' ? colors.warning : colors.primary;
 
 /** « Aujourd'hui », « Demain », « J-12 », « Passée ». */
 export function countdownLabel(days: number): string {

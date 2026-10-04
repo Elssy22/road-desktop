@@ -25,6 +25,7 @@ import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { listTenderOffers, type TenderOffer } from '../../data/tenderOffers';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { needsFollowUp } from '../../lib/followUp';
+import { PROSPECT_RETENTION_YEARS } from '../../lib/crmRetention';
 import { daysUntil, TODAY_ALERT_DAYS } from '../../lib/keyDateAlerts';
 import { formatMoney } from '../../lib/money';
 import { useToday } from '../../lib/useToday';
@@ -181,12 +182,12 @@ export function AgencyScreen({ userId }: { userId: string }) {
       subtitle: 'Tâches, échéances et rappels par mois ou semaine',
     },
     {
-      // Réglages > Données personnelles sur le mobile ; ici tant que les Réglages ne sont pas portés.
+      // Aussi accessible depuis Réglages > Données personnelles, comme sur le mobile.
       to: '/agency/prospect-purge',
       category: 'reminders',
       icon: ShieldCheck,
       title: 'Purge RGPD',
-      subtitle: 'Prospects inactifs depuis 3 ans',
+      subtitle: `Prospects inactifs depuis ${PROSPECT_RETENTION_YEARS} ans`,
     },
   ];
 

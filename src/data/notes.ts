@@ -37,7 +37,7 @@ export async function getNote(id: string): Promise<Note | null> {
  * Première écriture d'une nouvelle note : l'id est choisi par l'éditeur dès
  * l'ouverture, mais la ligne n'est créée qu'à la première saisie.
  */
-export const insertNote = (id: string, content: NoteContent) => insertRow(NOTES, content, id);
+export const addNote = (id: string, content: NoteContent) => insertRow(NOTES, content, id);
 
 export const updateNote = (id: string, patch: Partial<NoteContent>) => updateRow(NOTES, id, patch);
 

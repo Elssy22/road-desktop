@@ -5,7 +5,7 @@ import { formatDueLabel } from '../lib/dates';
 import { alertLevel, countdownLabel, daysUntil, type AlertLevel } from '../lib/keyDateAlerts';
 import { Badge, ListRow } from './ui';
 
-/** Mêmes couleurs que `alertColor` (lib/keyDateAlerts.ts), en variables CSS. */
+/** Couleur de chaque palier d'alerte (lib/keyDateAlerts.ts), en variables CSS. */
 const ALERT_COLORS: Record<AlertLevel, string> = {
   j7: 'var(--color-danger)',
   j30: 'var(--color-warning)',

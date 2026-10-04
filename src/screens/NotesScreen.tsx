@@ -8,7 +8,7 @@ import { SearchField } from '../components/SearchField';
 import { CardList, CardNote, CategoryCard, ErrorBanner, GradientButton, Panel, ScreenHeader } from '../components/ui';
 import {
   getNote,
-  insertNote,
+  addNote,
   listNotes,
   setNotePinned,
   softDeleteNote,
@@ -250,7 +250,7 @@ function NoteEditor({
       const confirmed = confirmedRef.current;
       try {
         if (confirmed) await updateNote(noteId, changes(confirmed, content));
-        else await insertNote(noteId, content);
+        else await addNote(noteId, content);
         confirmedRef.current = content;
         if (sameContent(draftRef.current, content)) removeStored(draftKey(noteId));
         if (mountedRef.current) setError(null);

@@ -24,8 +24,7 @@ const dayOf = (iso: string | null) => (iso ? toDateKey(new Date(iso)) : null);
 /**
  * Purge RGPD des prospects inactifs (DECISIONS.md §32) : portage web de
  * mobile-legacy/src/screens/ProspectPurgeScreen.tsx (Réglages > Données
- * personnelles sur le mobile, rangé dans l'Agence sur Mac tant que les Réglages
- * ne sont pas portés). Rien n'est supprimé sans une confirmation explicite,
+ * personnelles, et aussi dans l'Agence sur Mac). Rien n'est supprimé sans une confirmation explicite,
  * contact par contact ou pour toute la liste.
  */
 export function ProspectPurgeScreen() {
