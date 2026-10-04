@@ -1887,3 +1887,32 @@ de commande avec `xcodebuild`, donc indépendant de notre configuration). Xcode 
   - Supabase : `qonto_id` unique global au lieu de `(user_id, qonto_id)`, `search_path` des
     fonctions de trigger, UPDATE de toutes les colonnes de `tender_offers` (migrations
     partagées avec le mobile).
+
+## 38. Desktop — session morte : retour à l'écran de connexion
+
+- Symptôme (constaté par Landry) : après la garde du §36, une session **vraiment** perdue
+  (jeton de rafraîchissement expiré ou révoqué) laissait l'app « connectée » et toutes les
+  lectures échouaient en boucle sur « Session momentanément indisponible ». Seul remède :
+  se déconnecter puis se reconnecter à la main.
+- Signal retenu, fourni par auth-js (2.117, `_callRefreshToken`) : un échec de
+  renouvellement **retryable** (`AuthRetryableFetchError` : réseau, 5xx) laisse la session
+  en place ; un refus du serveur (4xx, `AuthApiError`) la retire et émet `SIGNED_OUT` dès que
+  le jeton d'accès a réellement expiré. `getSession()` renvoie alors une erreur non
+  retryable, ou plus de session du tout. Pas de compteur d'échecs : ce signal suffit.
+- Ce qui manquait : personne ne reposait la question après un refus. auth-js resert le même
+  échec pendant 60 s sans retenter, et son minuteur s'arrête quand la fenêtre est cachée.
+  Désormais chaque lecture refusée par la garde émet `road:session-refused` ;
+  `SessionProvider` appelle alors `getSession()` (un seul appel à la fois) :
+  - session présente : rien à faire ;
+  - erreur retryable (ou renouvellement concurrent écarté) : passager, l'écran garde ses
+    données, nouvelle vérification 65 s plus tard si le navigateur est en ligne, sinon à
+    l'évènement `online` ;
+  - autre erreur, ou session absente : `signOut({ scope: 'local' })` (sans appel réseau),
+    session mise à `null` → AuthScreen affiche « Ta session a expiré : reconnecte-toi pour
+    retrouver tes données. »
+- Le même message s'affiche quand auth-js émet seul `SIGNED_OUT` ; il est omis après une
+  déconnexion demandée depuis l'app (`useSignOut` → `setUserSigningOut`).
+- Limites : non testé contre le vrai serveur (pas d'app lancée ici) ; un serveur qui répond
+  en 5xx indéfiniment est traité comme passager (se reconnecter n'y changerait rien) ; la
+  détection n'intervient qu'à la prochaine lecture refusée (focus, écriture, retour réseau),
+  jusqu'à environ 65 s plus tard si auth-js resert encore un échec réseau en cache.
