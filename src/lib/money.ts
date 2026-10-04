@@ -14,7 +14,9 @@ export const formatEuros = (amount: number) => formatMoney(amount, 'EUR');
 
 /** Saisie libre ("1 200,5", "1200.50") → nombre positif, ou null si invalide. */
 export function parseAmount(text: string): number | null {
-  const cleaned = text.replace(/[\s  ]/g, '').replace(',', '.');
+  // \s couvre aussi les espaces insécables et fines insécables (U+00A0, U+202F),
+  // séparateurs de milliers d'Intl en français, recopiés depuis un montant affiché.
+  const cleaned = text.replace(/\s/g, '').replace(',', '.');
   if (!/^\d+(\.\d{0,2})?$/.test(cleaned)) return null;
   return Number(cleaned);
 }

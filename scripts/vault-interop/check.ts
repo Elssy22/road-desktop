@@ -7,11 +7,13 @@
 //   node --import ./scripts/vault-interop/hooks.mjs ./scripts/vault-interop/check.ts
 // Toutes les lignes doivent afficher « true » ou « refusée ».
 const store = new Map<string, string>();
-(globalThis as any).localStorage = {
-  getItem: (k: string) => store.get(k) ?? null,
-  setItem: (k: string, v: string) => store.set(k, v),
-  removeItem: (k: string) => store.delete(k),
-};
+Object.assign(globalThis, {
+  localStorage: {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => store.set(k, v),
+    removeItem: (k: string) => store.delete(k),
+  },
+});
 const web = await import('../../src/lib/vault.ts');
 import { gcm } from '@noble/ciphers/aes.js';
 import { bytesToUtf8 } from '@noble/ciphers/utils.js';

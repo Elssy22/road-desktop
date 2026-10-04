@@ -46,7 +46,9 @@ export async function removeEncrypted(path: string): Promise<void> {
   if (error) console.warn('vault: suppression Storage échouée', error.message);
 }
 
-export const safeName = (name: string) => name.replace(/[/\\:*?"<>|\u0000-\u001f]/g, '_').slice(0, 120) || 'document';
+// Caractères de contrôle retirés exprès : interdits ou piégeux dans un nom de fichier.
+// eslint-disable-next-line no-control-regex
+export const safeName =(name: string) => name.replace(/[/\\:*?"<>|\u0000-\u001f]/g, '_').slice(0, 120) || 'document';
 
 /** Aperçu intégré possible : images uniquement (la CSP de la webview autorise `img-src blob:`). */
 export const canPreview = (meta: DocumentMeta) => /^image\/(png|jpe?g|gif|webp|avif|bmp)$/i.test(meta.mime);

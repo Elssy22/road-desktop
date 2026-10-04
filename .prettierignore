@@ -1,0 +1,8 @@
+dist
+node_modules
+mobile-legacy
+src-tauri
+supabase
+package-lock.json
+claude_*.json
+*.md
