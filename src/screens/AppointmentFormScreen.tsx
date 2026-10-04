@@ -221,8 +221,14 @@ function AppointmentForm({ id }: { id?: string }) {
     });
   };
 
-  const openDebrief = () =>
-    navigate(form.contact_id ? `/agency/meeting-report?contact=${form.contact_id}` : '/agency/meeting-report');
+  // Heure enregistrée du RDV (pas celle du formulaire en cours de modification) :
+  // date de la note et de l'entrée d'historique du compte-rendu.
+  const openDebrief = () => {
+    if (!appointment) return;
+    const q = new URLSearchParams({ at: appointment.start_at });
+    if (form.contact_id) q.set('contact', form.contact_id);
+    navigate(`/agency/meeting-report?${q}`);
+  };
 
   const debriefHint = !form.debrief_reminder_enabled
     ? null

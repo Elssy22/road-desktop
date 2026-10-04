@@ -18,6 +18,8 @@ export type MeetingReportDraft = {
   tasks: { id: string; title: string; due_date: string | null }[];
   /** Si présent, le résumé est aussi ajouté à l'historique du contact (type « rdv »). */
   interaction: { id: string; contact_id: string; summary: string } | null;
+  /** Début du RDV (ISO) quand le compte-rendu est ouvert depuis l'agenda ; sinon l'heure de la saisie. */
+  happenedAt: string | null;
 };
 
 const insertMissing = async (table: string, rows: Record<string, unknown>[]) =>
@@ -43,7 +45,7 @@ export async function saveMeetingReport(draft: MeetingReportDraft) {
           contact_id: draft.interaction.contact_id,
           type: 'rdv',
           summary: draft.interaction.summary,
-          happened_at: ts,
+          happened_at: draft.happenedAt ?? ts,
           ...stamp,
         },
       ]);

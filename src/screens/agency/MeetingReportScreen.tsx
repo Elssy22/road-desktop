@@ -17,8 +17,9 @@ import {
 } from '../../components/ui';
 import { listContacts, type ContactWithLast } from '../../data/crm';
 import { saveMeetingReport } from '../../data/meetingReport';
+import { formatTimeOfDay } from '../../data/reminders';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
-import { formatLongDate, type DateKey } from '../../lib/dates';
+import { formatLongDate, toDateKey, type DateKey } from '../../lib/dates';
 import { meetingNoteBody, meetingNoteTitle, summarizeMeeting } from '../../lib/meetingSummary';
 import { useToday } from '../../lib/useToday';
 
@@ -64,8 +65,11 @@ const writeDraft = (userId: string, text: string) => {
  */
 export function MeetingReportScreen({ userId }: { userId: string }) {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const today = useToday();
+  // Ouvert depuis un RDV : `at` = son début (ISO). Sinon, le RDV est daté de la saisie.
+  const atParam = params.get('at');
+  const meetingAt = atParam && !Number.isNaN(Date.parse(atParam)) ? new Date(atParam) : null;
   const { confirm, dialog } = useConfirm();
 
   const [notes, setNotes] = useState(() => readDraft(userId));
@@ -128,7 +132,7 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
     try {
       await saveMeetingReport({
         noteId: result.noteId,
-        noteTitle: meetingNoteTitle(formatLongDate(today), contact?.name ?? null),
+        noteTitle: meetingNoteTitle(formatLongDate(meetingAt ? toDateKey(meetingAt) : today), contact?.name ?? null),
         noteBody: meetingNoteBody(summary, notes),
         tasks: checkedTasks.map((t) => ({ id: t.key, title: t.title.trim(), due_date: t.due_date })),
         interaction:
@@ -142,6 +146,7 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
                     : summary,
               }
             : null,
+        happenedAt: meetingAt?.toISOString() ?? null,
       });
     } catch (e) {
       setSaving(false);
@@ -188,7 +193,15 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
                 Voir les tâches
               </button>
             )}
-            <button type="button" className="button button--primary" onClick={() => setSaved(null)}>
+            <button
+              type="button"
+              className="button button--primary"
+              onClick={() => {
+                // Le RDV d'origine est traité : le suivant sera daté de sa saisie.
+                setParams({}, { replace: true });
+                setSaved(null);
+              }}
+            >
               Nouveau compte-rendu
             </button>
           </div>
@@ -212,6 +225,11 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
           }
         >
           <div className="form">
+            {meetingAt && (
+              <CardNote>
+                Rendez-vous du {formatLongDate(toDateKey(meetingAt))} à {formatTimeOfDay(meetingAt.toISOString())}.
+              </CardNote>
+            )}
             <FormField label="Contact (facultatif)" htmlFor="meeting-contact">
               <ContactSelect
                 id="meeting-contact"
