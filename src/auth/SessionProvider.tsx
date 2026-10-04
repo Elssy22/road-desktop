@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
+import { notifyDataChanged } from '../data/base';
 import { supabase } from '../lib/supabase';
 
 // Repris du mobile. Sans équivalent d'AppState ici : dans une webview,
@@ -29,20 +30,26 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       .catch((e: unknown) =>
         setState((s) => ({ ...s, ready: true, error: e instanceof Error ? e.message : String(e) }))
       );
-    const { data } = supabase.auth.onAuthStateChange((_event, session) =>
-      setState((s) => ({ ...s, session, ready: true }))
-    );
-    return () => data.subscription.unsubscribe();
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      setState((s) => ({ ...s, session, ready: true }));
+      // Jeton renouvelé (après une veille ou une coupure réseau) : les lectures
+      // refusées pendant l'indisponibilité de la session (lib/supabase.ts) sont relancées.
+      // Différé : supabase-js déconseille d'appeler ses méthodes dans ce rappel.
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') setTimeout(notifyDataChanged, 0);
+    });
+    // Retour du réseau : getSession relance le renouvellement si le jeton a
+    // expiré entre-temps (TOKEN_REFRESHED ci-dessus), sinon on relit directement.
+    const onOnline = () => {
+      void supabase.auth.getSession().then(() => notifyDataChanged());
+    };
+    window.addEventListener('online', onOnline);
+    return () => {
+      data.subscription.unsubscribe();
+      window.removeEventListener('online', onOnline);
+    };
   }, []);
 
   return <SessionContext.Provider value={state}>{children}</SessionContext.Provider>;
 }
 
 export const useSession = () => useContext(SessionContext);
-
-/** À utiliser uniquement dans les écrans protégés (session garantie). */
-export function useUserId(): string {
-  const { session } = useSession();
-  if (!session) throw new Error('useUserId() appelé sans session active');
-  return session.user.id;
-}

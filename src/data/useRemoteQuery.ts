@@ -4,8 +4,11 @@ import { onDataChanged } from './base';
 
 /**
  * Lecture Supabase pour un écran (remplace useLocalQuery du mobile) : charge à
- * l'affichage et quand `load` change, puis relit après chaque écriture de l'app
- * et au retour sur la fenêtre (modifications faites depuis le mobile).
+ * l'affichage et quand `load` change, puis relit après chaque écriture de l'app,
+ * au renouvellement du jeton et au retour sur la fenêtre (modifications faites
+ * depuis le mobile). En cas d'échec, les dernières données lues restent
+ * affichées avec l'erreur : une lecture refusée (session indisponible, cf.
+ * lib/supabase.ts) ne vide jamais l'écran.
  * `load` doit être stable (useCallback) : chaque nouvelle référence relance la lecture.
  */
 export function useRemoteQuery<T>(load: () => Promise<T>, initial: T) {
@@ -33,6 +36,9 @@ export function useRemoteQuery<T>(load: () => Promise<T>, initial: T) {
           if (active && call === latest) setLoading(false);
         });
     };
+    // Paramètres changés (`load` différent) : les données affichées ne
+    // correspondent plus à la demande tant que la nouvelle lecture n'a pas répondu.
+    setLoading(true);
     run();
     const unsubscribe = onDataChanged(run);
     window.addEventListener('focus', run);

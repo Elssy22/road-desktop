@@ -1774,3 +1774,25 @@ de commande avec `xcodebuild`, donc indépendant de notre configuration). Xcode 
 - Build web vérifié (`npm run build`, `tsc --noEmit` propres). La coquille Tauri elle-même
   (Rust/`cargo tauri dev`) n'a pas pu être testée depuis le bac à sable Linux de l'assistant
   (pas de toolchain Rust) — premier test réel à faire sur le Mac de Landry.
+
+## 36. Desktop — lot correctif (bug des listes vides, nettoyage de l'import, audit)
+
+### Bug « zéro contact, zéro projet, zéro tâche » (cause confirmée dans le code)
+
+- Quand le jeton d'accès a expiré (fenêtre masquée ou Mac en veille : supabase-js arrête son
+  minuteur de renouvellement quand la page est cachée) et que le renouvellement échoue de
+  façon **passagère** (réseau pas encore revenu au réveil, coupure, 5xx), `auth.getSession()`
+  renvoie `session: null` **sans** émettre `SIGNED_OUT` (auth-js `__loadSession` /
+  `_callRefreshToken`) : l'app ne repasse donc pas par l'écran de connexion.
+- supabase-js envoie alors les requêtes PostgREST avec la **clé anon** comme jeton
+  (`_getAccessToken` → repli sur `supabaseKey`). La RLS (`auth.uid() = user_id`) ne renvoie
+  pas d'erreur mais **zéro ligne**, et `useRemoteQuery` remplaçait les vraies données par ces
+  listes vides. Le retour sur la fenêtre (`focus`) déclenchait justement ces lectures au pire
+  moment ; l'échec étant mis en cache 60 s par auth-js, toutes les lectures de cette fenêtre
+  revenaient vides, et rien ne relisait les écrans une fois le jeton renouvelé.
+- Correctif : `lib/supabase.ts` refuse avant envoi toute requête REST / Storage / Functions
+  sans jeton utilisateur (erreur affichée, données conservées) ; `SessionProvider` relance les
+  lectures à `TOKEN_REFRESHED` / `SIGNED_IN` et au retour du réseau (`online`).
+- Pas propre au mode développement : le scénario touche aussi l'app compilée. Le HMR de Vite
+  pouvait en plus créer un second client en `tauri dev` si `lib/supabase.ts` était réévalué ;
+  le client est désormais unique par fenêtre (`globalThis`).
