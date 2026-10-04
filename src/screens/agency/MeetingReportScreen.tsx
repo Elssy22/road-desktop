@@ -20,8 +20,13 @@ import { formatLongDate, type DateKey } from '../../lib/dates';
 import { meetingNoteBody, meetingNoteTitle, summarizeMeeting } from '../../lib/meetingSummary';
 import { useToday } from '../../lib/useToday';
 
+/** `key` sert aussi d'id à la tâche créée (cf. `Result`). */
 type EditableTask = { key: string; title: string; due_date: DateKey | null; checked: boolean };
-type Result = { summary: string; tasks: EditableTask[] };
+/**
+ * Ids des lignes à créer, tirés une seule fois à la réception du résumé : un
+ * nouvel essai après un échec réseau en cours d'enregistrement ne crée pas de doublon.
+ */
+type Result = { summary: string; tasks: EditableTask[]; noteId: string; interactionId: string };
 
 const NO_CONTACTS: ContactWithLast[] = [];
 /** Longueur max du résumé recopié dans l'historique du contact (le CR complet est dans Notes). */
@@ -95,7 +100,9 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
       const r = await summarizeMeeting(text, today);
       setResult({
         summary: r.summary,
-        tasks: r.suggested_tasks.map((t, i) => ({ key: `${i}`, ...t, checked: true })),
+        tasks: r.suggested_tasks.map((t) => ({ key: crypto.randomUUID(), ...t, checked: true })),
+        noteId: crypto.randomUUID(),
+        interactionId: crypto.randomUUID(),
       });
     } catch (e) {
       // Les notes restent dans le champ (et dans le brouillon) : rien n'est perdu.
@@ -118,12 +125,14 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
     const summary = result.summary.trim();
     try {
       await saveMeetingReport({
+        noteId: result.noteId,
         noteTitle: meetingNoteTitle(formatLongDate(today), contact?.name ?? null),
         noteBody: meetingNoteBody(summary, notes),
-        tasks: checkedTasks.map((t) => ({ title: t.title.trim(), due_date: t.due_date })),
+        tasks: checkedTasks.map((t) => ({ id: t.key, title: t.title.trim(), due_date: t.due_date })),
         interaction:
           contact && addToHistory
             ? {
+                id: result.interactionId,
                 contact_id: contact.id,
                 summary:
                   summary.length > INTERACTION_SUMMARY_MAX
