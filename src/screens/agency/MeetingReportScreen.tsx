@@ -2,6 +2,7 @@ import { CircleAlert, FileText, Sparkles, SquareCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import { ContactSelect } from '../../components/ContactSelect';
 import { useConfirm } from '../../components/Dialog';
 import {
   CardList,
@@ -211,21 +212,13 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
         >
           <div className="form">
             <FormField label="Contact (facultatif)" htmlFor="meeting-contact">
-              <select
+              <ContactSelect
                 id="meeting-contact"
-                className="input"
-                value={selectedContact ?? ''}
-                onChange={(e) => setSelectedContact(e.target.value || null)}
-              >
-                <option value="">Aucun</option>
-                {/* Contact passé dans l'URL mais pas encore chargé : l'option existe déjà. */}
-                {selectedContact && !contact && <option value={selectedContact}>…</option>}
-                {contacts.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.club ? `${c.name} · ${c.club}` : c.name}
-                  </option>
-                ))}
-              </select>
+                contacts={contacts}
+                value={selectedContact}
+                removable={false}
+                onChange={setSelectedContact}
+              />
             </FormField>
             <FormField label="Notes du RDV" htmlFor="meeting-notes">
               <textarea

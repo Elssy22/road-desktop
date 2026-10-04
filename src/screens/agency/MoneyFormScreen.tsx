@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useConfirm } from '../../components/Dialog';
+import { ContactSelect } from '../../components/ContactSelect';
 import { CardNote, CategoryCard, Chip, ChipRow, ErrorBanner, FormField, ScreenHeader } from '../../components/ui';
 import { listContacts, type ContactWithLast } from '../../data/crm';
 import {
@@ -83,8 +84,6 @@ function MoneyForm({ id }: { id?: string }) {
   const [saving, setSaving] = useState(false);
 
   const { data: contacts } = useRemoteQuery(listContacts, NO_CONTACTS);
-  // Contact lié supprimé entre-temps : il n'est plus dans la liste, le lien est proposé au retrait.
-  const contactMissing = form.contact_id != null && contacts.length > 0 && !contacts.some((c) => c.id === form.contact_id);
   const { data: projects } = useRemoteQuery(listProjects, NO_PROJECTS);
   // Projets proposés : en cours, plus celui déjà lié quel que soit son statut.
   const projectChoices = projects.filter((p) => p.status !== 'terminé' || p.id === form.project_id);
@@ -235,26 +234,12 @@ function MoneyForm({ id }: { id?: string }) {
           <CategoryCard category="finance" icon={Link2} title="Contact et projet">
             <div className="form">
               <FormField label="Contact lié" htmlFor="money-contact">
-                <span className="inline-field">
-                  <select
-                    id="money-contact"
-                    className="select"
-                    value={contactMissing ? '' : (form.contact_id ?? '')}
-                    onChange={(e) => patch({ contact_id: e.target.value || null })}
-                  >
-                    <option value="">{contactMissing ? 'Contact supprimé' : 'Aucun'}</option>
-                    {contacts.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.club ? `${c.name} · ${c.club}` : c.name}
-                      </option>
-                    ))}
-                  </select>
-                  {form.contact_id && (
-                    <button type="button" className="text-action" onClick={() => patch({ contact_id: null })}>
-                      Retirer
-                    </button>
-                  )}
-                </span>
+                <ContactSelect
+                  id="money-contact"
+                  contacts={contacts}
+                  value={form.contact_id}
+                  onChange={(contact_id) => patch({ contact_id })}
+                />
               </FormField>
               <FormField label="Projet lié">
                 <ChipRow>

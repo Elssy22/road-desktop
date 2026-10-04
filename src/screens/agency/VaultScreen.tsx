@@ -3,6 +3,7 @@ import { useCallback, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CardList, CardNote, CategoryCard, ErrorBanner, FormField, GradientButton, ListRow, ScreenHeader, TextAction } from '../../components/ui';
+import { ContactSelect } from '../../components/ContactSelect';
 import { VaultPassphrasePanel } from '../../components/VaultPassphrasePanel';
 import { listContacts, type ContactWithLast } from '../../data/crm';
 import { addDocument, listDocuments, type DocumentWithLinks } from '../../data/documents';
@@ -135,20 +136,14 @@ export function VaultScreen({ userId }: { userId: string }) {
                 <CardNote>Le titre est visible en clair sur le serveur ; le fichier et son nom sont chiffrés.</CardNote>
                 <div className="form form--grid">
                   <FormField label="Contact (facultatif)" htmlFor="vault-contact">
-                    <select
+                    <ContactSelect
                       id="vault-contact"
-                      className="select"
-                      value={draft.contact_id ?? ''}
+                      contacts={data.contacts}
+                      value={draft.contact_id}
                       disabled={!!step}
-                      onChange={(e) => setDraft((d) => d && { ...d, contact_id: e.target.value || null })}
-                    >
-                      <option value="">Aucun</option>
-                      {data.contacts.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.club ? `${c.name} · ${c.club}` : c.name}
-                        </option>
-                      ))}
-                    </select>
+                      removable={false}
+                      onChange={(contact_id) => setDraft((d) => d && { ...d, contact_id })}
+                    />
                   </FormField>
                   <FormField label="Projet (facultatif)" htmlFor="vault-project">
                     <select
