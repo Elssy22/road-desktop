@@ -150,7 +150,12 @@ function KeyDateForm({ id }: { id?: string }) {
               <FormField label="Catégorie">
                 <ChipRow>
                   {KEY_DATE_CATEGORIES.map((c) => (
-                    <Chip key={c} label={CATEGORY_LABELS[c]} selected={form.category === c} onClick={() => patch({ category: c })} />
+                    <Chip
+                      key={c}
+                      label={CATEGORY_LABELS[c]}
+                      selected={form.category === c}
+                      onClick={() => patch({ category: c })}
+                    />
                   ))}
                 </ChipRow>
               </FormField>

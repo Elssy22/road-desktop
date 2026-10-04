@@ -79,14 +79,18 @@ export async function insertRow(
  * Un formulaire n'envoie que ceux-là : une modification faite entre-temps sur
  * le mobile, sur un autre champ, n'est pas écrasée (last-write-wins par ligne).
  */
-export function changedFields<T extends Record<string, unknown>>(original: Record<string, unknown>, next: T): Partial<T> {
+export function changedFields<T extends Record<string, unknown>>(
+  original: Record<string, unknown>,
+  next: T
+): Partial<T> {
   return Object.fromEntries(
     Object.entries(next).filter(([k, v]) => JSON.stringify(original[k] ?? null) !== JSON.stringify(v ?? null))
   ) as Partial<T>;
 }
 
 /** Message quand la ligne visée n'existe plus (supprimée depuis le mobile pendant l'édition, par ex.). */
-export const ROW_GONE = 'Cet élément a été supprimé entre-temps (peut-être depuis le mobile) : rien n’a été enregistré.';
+export const ROW_GONE =
+  'Cet élément a été supprimé entre-temps (peut-être depuis le mobile) : rien n’a été enregistré.';
 
 /**
  * Met à jour une ligne vivante. Lève ROW_GONE si aucune ligne n'a été touchée :

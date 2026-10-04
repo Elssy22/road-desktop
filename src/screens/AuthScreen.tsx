@@ -147,7 +147,12 @@ export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' 
             <button className="button button--primary" type="submit" disabled={busy}>
               {busy ? 'Envoi…' : 'Envoyer le lien'}
             </button>
-            <button className="button button--secondary" type="button" disabled={busy} onClick={() => switchMode('signIn')}>
+            <button
+              className="button button--secondary"
+              type="button"
+              disabled={busy}
+              onClick={() => switchMode('signIn')}
+            >
               Retour à la connexion
             </button>
           </div>

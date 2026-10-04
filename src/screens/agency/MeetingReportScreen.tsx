@@ -184,7 +184,11 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
           </CardNote>
           <div className="form-actions form-actions--start">
             {saved.contactId && (
-              <button type="button" className="button button--ghost" onClick={() => navigate(`/agency/contacts/${saved.contactId}`)}>
+              <button
+                type="button"
+                className="button button--ghost"
+                onClick={() => navigate(`/agency/contacts/${saved.contactId}`)}
+              >
                 Retour à la fiche
               </button>
             )}
@@ -221,7 +225,9 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
           icon={FileText}
           title="Notes du RDV"
           action={
-            notes.length > 0 && !loading ? <TextAction label="Effacer" category="tasks" onClick={confirmClear} /> : undefined
+            notes.length > 0 && !loading ? (
+              <TextAction label="Effacer" category="tasks" onClick={confirmClear} />
+            ) : undefined
           }
         >
           <div className="form">
@@ -295,7 +301,11 @@ export function MeetingReportScreen({ userId }: { userId: string }) {
             <CategoryCard
               category="tasks"
               icon={SquareCheck}
-              title={result.tasks.length ? `Tâches suggérées · ${checkedTasks.length}/${result.tasks.length}` : 'Tâches suggérées'}
+              title={
+                result.tasks.length
+                  ? `Tâches suggérées · ${checkedTasks.length}/${result.tasks.length}`
+                  : 'Tâches suggérées'
+              }
             >
               {result.tasks.length === 0 ? (
                 <CardNote>Aucune action identifiée dans les notes.</CardNote>

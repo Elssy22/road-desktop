@@ -51,7 +51,9 @@ export function ReminderRow({
         onClick={() => navigate(`/reminders/${reminder.id}`)}
         title="Modifier le rappel"
       >
-        <span className={reminder.done ? 'row__title row__title--done' : 'row__title'}>{reminder.title || 'Rappel'}</span>
+        <span className={reminder.done ? 'row__title row__title--done' : 'row__title'}>
+          {reminder.title || 'Rappel'}
+        </span>
         <span className="row__meta">
           <span className={late ? 'row__meta-item row__meta-item--danger' : 'row__meta-item'}>
             <AlarmClock size={12} />

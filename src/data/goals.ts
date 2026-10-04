@@ -111,7 +111,12 @@ export async function listGoals(userId: string): Promise<GoalList> {
       if (!qonto?.receipts) return { ...goal, project_title, ca_collected_cents: null, progress: 0 };
       const { start, end } = caPeriodBounds(goal.target_date, goal.ca_period);
       const collected = sumReceipts(qonto.receipts, start, end);
-      return { ...goal, project_title, ca_collected_cents: collected, progress: caProgress(collected, goal.ca_target_amount) };
+      return {
+        ...goal,
+        project_title,
+        ca_collected_cents: collected,
+        progress: caProgress(collected, goal.ca_target_amount),
+      };
     }
     return { ...goal, project_title, ca_collected_cents: null };
   });
@@ -121,7 +126,9 @@ export async function listGoals(userId: string): Promise<GoalList> {
 
 /** Objectif vivant, ou null s'il n'existe pas ou a été supprimé. */
 export async function getGoal(id: string): Promise<Goal | null> {
-  const goal = unwrap(await supabase.from(GOALS).select('*').eq('id', id).is('deleted_at', null).maybeSingle()) as Goal | null;
+  const goal = unwrap(
+    await supabase.from(GOALS).select('*').eq('id', id).is('deleted_at', null).maybeSingle()
+  ) as Goal | null;
   return goal && toGoal(goal);
 }
 

@@ -1,8 +1,7 @@
 // Recherche texte simple côté client : insensible à la casse et aux accents
 // ("ete" trouve "Été"), tous les mots de la requête doivent apparaître.
 
-export const normalizeForSearch = (s: string) =>
-  s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+export const normalizeForSearch = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 /** Prédicat réutilisable sur une liste ; requête vide = tout passe. */
 export function makeMatcher(query: string): (...fields: string[]) => boolean {

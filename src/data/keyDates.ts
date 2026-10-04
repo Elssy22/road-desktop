@@ -37,7 +37,14 @@ async function withContacts(rows: KeyDate[]): Promise<KeyDateWithContact[]> {
 /** Toutes les dates clés, de la plus proche à la plus lointaine. */
 export async function listKeyDates(): Promise<KeyDateWithContact[]> {
   const rows = await fetchAll<KeyDate>((a, b) =>
-    supabase.from(KEY_DATES).select('*').is('deleted_at', null).order('date').order('created_at').order('id').range(a, b)
+    supabase
+      .from(KEY_DATES)
+      .select('*')
+      .is('deleted_at', null)
+      .order('date')
+      .order('created_at')
+      .order('id')
+      .range(a, b)
   );
   return withContacts(rows);
 }

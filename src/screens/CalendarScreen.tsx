@@ -7,7 +7,16 @@ import { KeyDateRow } from '../components/KeyDateRow';
 import { ReminderRow } from '../components/ReminderRow';
 import { useTaskActions } from '../components/TaskActions';
 import { TaskRow } from '../components/TaskRow';
-import { CardList, CardNote, CategoryCard, ErrorBanner, Panel, ScreenHeader, SegmentedControl, TextAction } from '../components/ui';
+import {
+  CardList,
+  CardNote,
+  CategoryCard,
+  ErrorBanner,
+  Panel,
+  ScreenHeader,
+  SegmentedControl,
+  TextAction,
+} from '../components/ui';
 import { listAppointmentsBetween, type AppointmentWithContact } from '../data/appointments';
 import { listKeyDatesBetween, type KeyDateWithContact } from '../data/keyDates';
 import { listRemindersBetween, setReminderDone, type ReminderWithLinks } from '../data/reminders';
@@ -132,7 +141,8 @@ export function CalendarScreen() {
       return v;
     };
     for (const a of events.appointments) get(toDateKey(new Date(a.start_at))).agenda = true;
-    for (const t of tasks) if (t.due_date && !t.done && t.due_date >= from && t.due_date <= to) get(t.due_date).tasks = true;
+    for (const t of tasks)
+      if (t.due_date && !t.done && t.due_date >= from && t.due_date <= to) get(t.due_date).tasks = true;
     for (const k of events.keyDates) get(k.date).keyDates = true;
     for (const r of events.reminders) if (!r.done) get(toDateKey(new Date(r.remind_at))).reminders = true;
     return m;
@@ -151,8 +161,12 @@ export function CalendarScreen() {
   const arrow = (delta: -1 | 1) => {
     const label =
       mode === 'month'
-        ? delta < 0 ? 'Mois précédent' : 'Mois suivant'
-        : delta < 0 ? 'Semaine précédente' : 'Semaine suivante';
+        ? delta < 0
+          ? 'Mois précédent'
+          : 'Mois suivant'
+        : delta < 0
+          ? 'Semaine précédente'
+          : 'Semaine suivante';
     return (
       <button
         type="button"
@@ -201,8 +215,7 @@ export function CalendarScreen() {
                   mark?.reminders && 'rappels',
                 ].filter(Boolean);
                 // Sélection en dégradé soleil, aujourd'hui sur fond teinté, jours passés estompés.
-                const state =
-                  key === selected ? 'selected' : key === today ? 'today' : key < today ? 'past' : 'future';
+                const state = key === selected ? 'selected' : key === today ? 'today' : key < today ? 'past' : 'future';
                 return (
                   <button
                     key={key}

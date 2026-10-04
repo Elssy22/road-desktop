@@ -68,7 +68,9 @@ export function AgencyScreen({ userId }: { userId: string }) {
     const { contacts, projects, goals, keyDates, money, tenders } = data;
     const unpaid = money.map((m) => effectiveStatus(m, today)).filter((s) => s !== 'payé');
     // Signés et perdus exclus : ils attendent juste d'être sortis du pipeline.
-    const open = contacts.filter((c) => c.pipeline_stage && c.pipeline_stage !== 'signe' && c.pipeline_stage !== 'perdu');
+    const open = contacts.filter(
+      (c) => c.pipeline_stage && c.pipeline_stage !== 'signe' && c.pipeline_stage !== 'perdu'
+    );
     const potential = Math.round(open.reduce((sum, c) => sum + (c.pipeline_amount ?? 0), 0) * 100) / 100;
     const upcoming = keyDates.filter((k) => k.date >= today);
     return {
@@ -115,7 +117,10 @@ export function AgencyScreen({ userId }: { userId: string }) {
           ? `${plural(summary.prospects, 'prospect')} en cours` +
             (summary.potential > 0 ? ` · ${formatMoney(summary.potential, 'EUR')} potentiels` : '')
           : 'Prospection : à démarcher, deck envoyé, à relancer…',
-      alert: summary.lateFollowups > 0 ? `${summary.lateFollowups} relance${summary.lateFollowups > 1 ? 's' : ''} en retard` : undefined,
+      alert:
+        summary.lateFollowups > 0
+          ? `${summary.lateFollowups} relance${summary.lateFollowups > 1 ? 's' : ''} en retard`
+          : undefined,
     },
     {
       to: '/agency/veille',
@@ -126,7 +131,10 @@ export function AgencyScreen({ userId }: { userId: string }) {
         summary.newTenders > 0
           ? `${summary.newTenders} nouvel${summary.newTenders > 1 ? 's' : ''} avis · BOAMP`
           : 'Marchés publics sport et communication · BOAMP',
-      alert: summary.urgentTenders > 0 ? `${summary.urgentTenders} urgent${summary.urgentTenders > 1 ? 's' : ''}` : undefined,
+      alert:
+        summary.urgentTenders > 0
+          ? `${summary.urgentTenders} urgent${summary.urgentTenders > 1 ? 's' : ''}`
+          : undefined,
     },
     {
       to: '/agency/projects',

@@ -124,7 +124,8 @@ function AppointmentForm({ id }: { id?: string }) {
   const { data: contacts } = useRemoteQuery(listContacts, NO_CONTACTS);
   const { data: projects } = useRemoteQuery(listProjects, NO_PROJECTS);
   // Élément lié supprimé entre-temps : il n'est plus dans la liste, le lien est proposé au retrait.
-  const projectMissing = form.project_id != null && projects.length > 0 && !projects.some((p) => p.id === form.project_id);
+  const projectMissing =
+    form.project_id != null && projects.length > 0 && !projects.some((p) => p.id === form.project_id);
 
   // Lu une seule fois à l'ouverture (une écriture ailleurs pendant la saisie ne l'écrase pas).
   useEffect(() => {
@@ -146,7 +147,12 @@ function AppointmentForm({ id }: { id?: string }) {
   const patch = (p: Partial<Form>) => setForm((f) => ({ ...f, ...p }));
   const endBeforeStart = form.end !== '' && minutesOf(form.end) <= minutesOf(form.start);
   const canSave =
-    form.title.trim().length > 0 && form.start !== '' && !endBeforeStart && !loading && !saving && (!id || !!appointment);
+    form.title.trim().length > 0 &&
+    form.start !== '' &&
+    !endBeforeStart &&
+    !loading &&
+    !saving &&
+    (!id || !!appointment);
 
   const startAt = form.start ? toInstant(form.date, form.start).toISOString() : null;
   const endAt = form.end ? toInstant(form.date, form.end).toISOString() : null;
@@ -343,7 +349,9 @@ function AppointmentForm({ id }: { id?: string }) {
                 <CardList>
                   {suggestions.length === 0 ? (
                     <li className="row">
-                      <span className="row__subtitle">Aucune adresse trouvée. Le texte saisi est conservé tel quel.</span>
+                      <span className="row__subtitle">
+                        Aucune adresse trouvée. Le texte saisi est conservé tel quel.
+                      </span>
                     </li>
                   ) : (
                     suggestions.map((s) => (

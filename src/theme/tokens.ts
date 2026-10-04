@@ -241,9 +241,10 @@ export const makeTheme = (scheme: ColorScheme): Theme => {
   return {
     scheme,
     colors,
-    categories: Object.fromEntries(
-      Object.entries(CATEGORY_TINT).map(([c, t]) => [c, colors.tints[t]])
-    ) as Record<Category, Tint>,
+    categories: Object.fromEntries(Object.entries(CATEGORY_TINT).map(([c, t]) => [c, colors.tints[t]])) as Record<
+      Category,
+      Tint
+    >,
     sunsetGradient: `linear-gradient(135deg, ${colors.gradientStart}, ${colors.gradientEnd})`,
     shadows: scheme === 'dark' ? darkShadows : lightShadows,
     spacing,

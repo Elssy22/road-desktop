@@ -25,12 +25,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     // getSession lit la session persistée localement : fonctionne hors ligne.
     supabase.auth
       .getSession()
-      .then(({ data, error }) =>
-        setState({ session: data.session, ready: true, error: error?.message ?? null })
-      )
-      .catch((e: unknown) =>
-        setState((s) => ({ ...s, ready: true, error: errorMessage(e) }))
-      );
+      .then(({ data, error }) => setState({ session: data.session, ready: true, error: error?.message ?? null }))
+      .catch((e: unknown) => setState((s) => ({ ...s, ready: true, error: errorMessage(e) })));
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       setState((s) => ({ ...s, session, ready: true }));
       // Jeton renouvelé (après une veille ou une coupure réseau) : les lectures

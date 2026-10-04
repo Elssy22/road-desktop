@@ -25,7 +25,11 @@ export function loadWeeklyReview(userId: string, weekStart: DateKey): WeeklyRevi
     if (!parsed || typeof parsed !== 'object') return EMPTY_REVIEW;
     const p = parsed as Record<string, unknown>;
     const text = (k: keyof WeeklyReviewText) => (typeof p[k] === 'string' ? p[k] : '');
-    return { done_text: text('done_text'), slipping_text: text('slipping_text'), next_priority_text: text('next_priority_text') };
+    return {
+      done_text: text('done_text'),
+      slipping_text: text('slipping_text'),
+      next_priority_text: text('next_priority_text'),
+    };
   } catch {
     return EMPTY_REVIEW;
   }

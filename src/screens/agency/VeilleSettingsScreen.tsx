@@ -165,7 +165,13 @@ function KeywordCard({
           disabled={saving}
           aria-label={`Nouveau mot-clé ${list.title.toLowerCase()}`}
         />
-        <TextAction label="Ajouter" icon={Plus} category="veille" onClick={() => void add()} disabled={saving || !draft.trim()} />
+        <TextAction
+          label="Ajouter"
+          icon={Plus}
+          category="veille"
+          onClick={() => void add()}
+          disabled={saving || !draft.trim()}
+        />
       </form>
       {error && <CardNote tone="danger">{error}</CardNote>}
     </CategoryCard>

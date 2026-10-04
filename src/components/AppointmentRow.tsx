@@ -10,7 +10,13 @@ import { formatTimeRange, type AppointmentWithContact } from '../data/appointmen
  * passé, un raccourci vers le compte-rendu. Portage web de
  * mobile-legacy/src/components/AppointmentRow.tsx.
  */
-export function AppointmentRow({ appointment, showDebrief }: { appointment: AppointmentWithContact; showDebrief?: boolean }) {
+export function AppointmentRow({
+  appointment,
+  showDebrief,
+}: {
+  appointment: AppointmentWithContact;
+  showDebrief?: boolean;
+}) {
   const navigate = useNavigate();
   const past = new Date(appointment.end_at ?? appointment.start_at) < new Date();
   const details = [appointment.location, appointment.contact_name].filter(Boolean).join(' · ');
@@ -42,7 +48,9 @@ export function AppointmentRow({ appointment, showDebrief }: { appointment: Appo
           className="icon-button icon-button--primary"
           onClick={() =>
             navigate(
-              appointment.contact_id ? `/agency/meeting-report?contact=${appointment.contact_id}` : '/agency/meeting-report'
+              appointment.contact_id
+                ? `/agency/meeting-report?contact=${appointment.contact_id}`
+                : '/agency/meeting-report'
             )
           }
           aria-label={`Compte-rendu du RDV ${appointment.title}`}

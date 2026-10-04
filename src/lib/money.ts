@@ -33,5 +33,4 @@ export function totalsByCurrency(items: { amount: number; currency: string }[]):
 }
 
 /** "1 200 € · 300 $" */
-export const formatTotals = (totals: [string, number][]) =>
-  totals.map(([c, n]) => formatMoney(n, c)).join(' · ');
+export const formatTotals = (totals: [string, number][]) => totals.map(([c, n]) => formatMoney(n, c)).join(' · ');

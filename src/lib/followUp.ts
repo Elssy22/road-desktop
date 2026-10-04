@@ -14,5 +14,4 @@ export function daysSinceContact(c: ContactWithLast, today: DateKey): number {
   return daysBetween(toDateKey(new Date(ref)), today);
 }
 
-export const needsFollowUp = (c: ContactWithLast, today: DateKey) =>
-  daysSinceContact(c, today) >= FOLLOW_UP_DAYS;
+export const needsFollowUp = (c: ContactWithLast, today: DateKey) => daysSinceContact(c, today) >= FOLLOW_UP_DAYS;

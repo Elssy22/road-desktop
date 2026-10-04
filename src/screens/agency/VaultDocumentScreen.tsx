@@ -39,9 +39,12 @@ function VaultDocument({ id, userId }: { id: string; userId: string }) {
   const { unlocked, markUnlocked, lock } = useVaultLock(userId, () => setOpened(null));
 
   // Le clair ne vit qu'en mémoire : l'URL blob est révoquée dès qu'elle n'est plus affichée.
-  useEffect(() => () => {
-    if (opened) URL.revokeObjectURL(opened.url);
-  }, [opened]);
+  useEffect(
+    () => () => {
+      if (opened) URL.revokeObjectURL(opened.url);
+    },
+    [opened]
+  );
 
   const open = async () => {
     if (!doc || step) return;
@@ -81,7 +84,9 @@ function VaultDocument({ id, userId }: { id: string; userId: string }) {
       eyebrow="Coffre"
       title={doc?.title || 'Document'}
       action={
-        unlocked ? <TextAction label="Verrouiller" icon={LockOpen} onClick={lock} title="Verrouiller le coffre" /> : undefined
+        unlocked ? (
+          <TextAction label="Verrouiller" icon={LockOpen} onClick={lock} title="Verrouiller le coffre" />
+        ) : undefined
       }
     />
   );

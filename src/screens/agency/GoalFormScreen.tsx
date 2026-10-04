@@ -29,7 +29,14 @@ import { listProjects, type ProjectWithProgress } from '../../data/projects';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
 import { changedFields } from '../../data/base';
-import { CA_PERIODS, caPeriodBounds, caProgress, formatCaPeriod, type CaPeriod, type GoalKind } from '../../lib/caGoals';
+import {
+  CA_PERIODS,
+  caPeriodBounds,
+  caProgress,
+  formatCaPeriod,
+  type CaPeriod,
+  type GoalKind,
+} from '../../lib/caGoals';
 import type { DateKey } from '../../lib/dates';
 import { errorMessage } from '../../lib/errors';
 import { amountToInput, formatEuros, parseAmount } from '../../lib/money';
@@ -245,7 +252,9 @@ function GoalForm({ id, userId }: { id?: string; userId: string }) {
                       Encaissé : {formatEuros(collectedCents / 100)}
                       {caAmount ? ` / ${formatEuros(caAmount)} · ${caProgress(collectedCents, caAmount)} %` : ''}
                     </p>
-                    {!!caAmount && <ProgressBar value={caProgress(collectedCents, caAmount)} label="Encaissé sur la période" />}
+                    {!!caAmount && (
+                      <ProgressBar value={caProgress(collectedCents, caAmount)} label="Encaissé sur la période" />
+                    )}
                   </div>
                 )}
                 {qonto && !qonto.receipts ? (
@@ -286,7 +295,12 @@ function GoalForm({ id, userId }: { id?: string; userId: string }) {
               </div>
               <ChipRow>
                 {PROGRESS_PRESETS.map((p) => (
-                  <Chip key={p} label={`${p} %`} selected={form.progress === p} onClick={() => patch({ progress: p })} />
+                  <Chip
+                    key={p}
+                    label={`${p} %`}
+                    selected={form.progress === p}
+                    onClick={() => patch({ progress: p })}
+                  />
                 ))}
               </ChipRow>
             </CategoryCard>

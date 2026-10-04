@@ -51,7 +51,8 @@ export function NotesScreen() {
 
   // Une nouvelle note garde son éditeur quand l'URL passe de /notes/new à
   // /notes/:id après sa création (clé transmise dans l'état de navigation).
-  const editorKey = (location.state as { editorKey?: string } | null)?.editorKey ?? (id === NEW_NOTE_ID ? location.key : id);
+  const editorKey =
+    (location.state as { editorKey?: string } | null)?.editorKey ?? (id === NEW_NOTE_ID ? location.key : id);
   const openNote = notes.find((n) => n.id === id);
 
   const rows = (list: Note[]) => (
@@ -105,9 +106,7 @@ export function NotesScreen() {
             key={editorKey}
             id={id}
             pinned={openNote?.pinned}
-            onCreated={(noteId) =>
-              navigate(`/notes/${noteId}`, { replace: true, state: { editorKey } })
-            }
+            onCreated={(noteId) => navigate(`/notes/${noteId}`, { replace: true, state: { editorKey } })}
             onDeleted={() => navigate('/notes', { replace: true })}
           />
         ) : (
@@ -126,7 +125,8 @@ const SAVE_DEBOUNCE_MS = 700;
 
 const EMPTY: NoteContent = { title: '', body: '', pinned: false };
 const isEmpty = (c: NoteContent) => !c.title.trim() && !c.body.trim() && !c.pinned;
-const sameContent = (a: NoteContent, b: NoteContent) => a.title === b.title && a.body === b.body && a.pinned === b.pinned;
+const sameContent = (a: NoteContent, b: NoteContent) =>
+  a.title === b.title && a.body === b.body && a.pinned === b.pinned;
 
 /**
  * Copie locale de la saisie, effacée dès que Supabase a confirmé ce contenu :

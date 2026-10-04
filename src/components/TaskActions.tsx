@@ -80,7 +80,13 @@ function TaskActionsDialog({
         <span className="dialog__label">Échéance</span>
         <span className="dialog__inline">
           {/* Validation explicite : WebKit émet un changement à chaque segment saisi au clavier. */}
-          <input type="date" className="field" aria-label="Échéance" value={due} onChange={(e) => setDue(e.target.value)} />
+          <input
+            type="date"
+            className="field"
+            aria-label="Échéance"
+            value={due}
+            onChange={(e) => setDue(e.target.value)}
+          />
           <button
             type="button"
             className="text-action"

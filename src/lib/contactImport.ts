@@ -100,7 +100,10 @@ const count = (s: string, ch: string) => s.split(ch).length - 1;
 // --- Mapping vers `contacts` ---------------------------------------------------
 
 /** Clé de comparaison des en-têtes : casse, accents, espaces et ponctuation ignorés. */
-const headerKey = (h: string) => normalizeForSearch(h).replace(/[^a-z0-9]+/g, ' ').trim();
+const headerKey = (h: string) =>
+  normalizeForSearch(h)
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 
 type Field =
   | 'name'

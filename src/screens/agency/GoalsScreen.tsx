@@ -73,8 +73,8 @@ function QontoNote({ qonto }: { qonto: QontoReceipts | null }) {
   }
   return (
     <CardNote>
-      Chiffre d’affaires calculé depuis les encaissements Qonto déjà importés. Pour les mettre à jour, lance
-      « Synchroniser » dans <Link to="/agency/money">Finances › Depuis Qonto</Link>.
+      Chiffre d’affaires calculé depuis les encaissements Qonto déjà importés. Pour les mettre à jour, lance «
+      Synchroniser » dans <Link to="/agency/money">Finances › Depuis Qonto</Link>.
     </CardNote>
   );
 }
@@ -111,7 +111,9 @@ function GoalRow({ goal, today, qonto }: { goal: GoalWithProject; today: DateKey
             {pending
               ? `Calcul depuis Qonto en attente · ${formatCaPeriod(ca.target_date, ca.ca_period)}`
               : `Calculé depuis Qonto · ${formatCaPeriod(ca.target_date, ca.ca_period)}` +
-                (qonto?.importedAt ? ` · dernier import ${formatEditedLabel(qonto.importedAt, today).toLowerCase()}` : ' · aucun import Qonto')}
+                (qonto?.importedAt
+                  ? ` · dernier import ${formatEditedLabel(qonto.importedAt, today).toLowerCase()}`
+                  : ' · aucun import Qonto')}
           </span>
         </span>
       )}
@@ -123,7 +125,11 @@ function GoalRow({ goal, today, qonto }: { goal: GoalWithProject; today: DateKey
             </span>
           )}
           {goal.project_id && goal.project_title && (
-            <button type="button" className="project-link" onClick={() => navigate(`/agency/projects/${goal.project_id}`)}>
+            <button
+              type="button"
+              className="project-link"
+              onClick={() => navigate(`/agency/projects/${goal.project_id}`)}
+            >
               <GitBranch size={12} />
               {goal.project_title}
             </button>

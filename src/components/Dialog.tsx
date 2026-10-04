@@ -75,7 +75,12 @@ export function useConfirm() {
     <Dialog title={options.title} onClose={close}>
       {options.message ? <p className="dialog__message">{options.message}</p> : null}
       <div className="dialog__actions">
-        <button type="button" className="button button--ghost" data-autofocus={options.danger || undefined} onClick={close}>
+        <button
+          type="button"
+          className="button button--ghost"
+          data-autofocus={options.danger || undefined}
+          onClick={close}
+        >
           {options.cancelLabel ?? 'Annuler'}
         </button>
         <button

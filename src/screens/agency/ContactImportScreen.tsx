@@ -141,10 +141,9 @@ export function ContactImportScreen({ userId }: { userId: string }) {
           <CategoryCard category="contacts" icon={FileUp} title="Fichier de prospection">
             <CardNote>
               Formats acceptés : .csv (séparateur « ; » ou « , ») et .xlsx (première feuille). Le tableau doit avoir une
-              ligne d’en-têtes, dont au moins « Nom ». Colonnes reconnues : Nom, Type, Niveau, Contact (nom,
-              rôle), Mail ou page de contact, Téléphone, Statut, Localisation / Dépt, Adresse, Site officiel,
-              Instagram, Spécificité / particularité historique, Groupe, N° affiliation. Les autres colonnes sont
-              recopiées dans les notes.
+              ligne d’en-têtes, dont au moins « Nom ». Colonnes reconnues : Nom, Type, Niveau, Contact (nom, rôle), Mail
+              ou page de contact, Téléphone, Statut, Localisation / Dépt, Adresse, Site officiel, Instagram, Spécificité
+              / particularité historique, Groupe, N° affiliation. Les autres colonnes sont recopiées dans les notes.
             </CardNote>
             <CardNote>
               Le fichier est lu sur cet ordinateur ; rien n’est enregistré avant ta confirmation, après l’aperçu.

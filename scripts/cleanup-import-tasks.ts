@@ -61,7 +61,15 @@ const { user } = check(await supabase.auth.signInWithPassword({ email: ROAD_EMAI
 const userId = user!.id;
 
 type ContactRow = { id: string; pipeline_stage: string | null; stage_changed_at: string | null; created_at: string };
-type TaskRow = { id: string; contact_id: string; auto_kind: string; done: boolean; deleted_at: string | null; created_at: string; due_date: string | null };
+type TaskRow = {
+  id: string;
+  contact_id: string;
+  auto_kind: string;
+  done: boolean;
+  deleted_at: string | null;
+  created_at: string;
+  due_date: string | null;
+};
 
 const contactsOfDay = check(
   await supabase
@@ -78,7 +86,9 @@ const perStamp = new Map<string, number>();
 for (const c of contactsOfDay) {
   if (c.stage_changed_at) perStamp.set(c.stage_changed_at, (perStamp.get(c.stage_changed_at) ?? 0) + 1);
 }
-const imported = contactsOfDay.filter((c) => c.stage_changed_at && (perStamp.get(c.stage_changed_at) ?? 0) >= MIN_BATCH);
+const imported = contactsOfDay.filter(
+  (c) => c.stage_changed_at && (perStamp.get(c.stage_changed_at) ?? 0) >= MIN_BATCH
+);
 const importedIds = new Set(imported.map((c) => c.id));
 
 // Toutes les tâches automatiques de ces contacts, supprimées comprises (par paquets : URL courte).
@@ -143,7 +153,10 @@ if (apply) {
       await supabase
         .from('tasks')
         .update({ deleted_at: ts, updated_at: ts })
-        .in('id', openDeck.slice(i, i + 100).map((t) => t.id))
+        .in(
+          'id',
+          openDeck.slice(i, i + 100).map((t) => t.id)
+        )
         .eq('auto_kind', 'deck')
         .is('deleted_at', null)
         .select('id')
@@ -181,12 +194,19 @@ if (apply) {
       await supabase
         .from('contacts')
         .update({ stage_changed_at: null, updated_at: ts })
-        .in('id', deckSent.slice(i, i + 100).map((c) => c.id))
+        .in(
+          'id',
+          deckSent.slice(i, i + 100).map((c) => c.id)
+        )
         .select('id')
     ) as { id: string }[];
     reset += rows.length;
   }
-  report.applied = { deck_tasks_soft_deleted: softDeleted, deck_tombstones_inserted: inserted, deck_sent_contacts_reset: reset };
+  report.applied = {
+    deck_tasks_soft_deleted: softDeleted,
+    deck_tombstones_inserted: inserted,
+    deck_sent_contacts_reset: reset,
+  };
 }
 
 writeFileSync(OUT, JSON.stringify(report, null, 2));

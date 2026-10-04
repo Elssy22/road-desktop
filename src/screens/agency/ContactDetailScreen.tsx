@@ -139,7 +139,9 @@ export function ContactDetailScreen() {
       confirmLabel: 'Supprimer',
       danger: true,
       onConfirm: () =>
-        void run(() => softDeleteContact(contact.id)).then((ok) => ok && navigate('/agency/contacts', { replace: true })),
+        void run(() => softDeleteContact(contact.id)).then(
+          (ok) => ok && navigate('/agency/contacts', { replace: true })
+        ),
     });
 
   const confirmDeleteInteraction = (i: Interaction) =>
@@ -167,7 +169,11 @@ export function ContactDetailScreen() {
         action={
           <div className="header-actions">
             {days >= FOLLOW_UP_DAYS && <Badge label={`À relancer · ${days} j`} color="var(--color-warning)" />}
-            <TextAction label="Modifier" icon={Pencil} onClick={() => navigate(`/agency/contacts/${contact.id}/edit`)} />
+            <TextAction
+              label="Modifier"
+              icon={Pencil}
+              onClick={() => navigate(`/agency/contacts/${contact.id}/edit`)}
+            />
             <TextAction label="Supprimer" icon={Trash2} onClick={confirmDelete} />
             <GradientButton
               label="Compte-rendu"
@@ -350,7 +356,9 @@ function ProspectionCard({
           right={<StageSelect value={stage} onChange={onChangeStage} label="Changer l’étape" />}
         />
         <ListRow
-          title={contact.pipeline_amount != null ? formatMoney(contact.pipeline_amount, 'EUR') : 'Montant non renseigné'}
+          title={
+            contact.pipeline_amount != null ? formatMoney(contact.pipeline_amount, 'EUR') : 'Montant non renseigné'
+          }
           subtitle="Montant potentiel"
           left={<Banknote size={18} className="tint-icon" />}
           onClick={() => navigate(`/agency/contacts/${contact.id}/edit`)}
@@ -370,7 +378,11 @@ function ProspectionCard({
         {autoTask && (
           <ListRow
             title={autoTask.title}
-            subtitle={autoTask.due_date ? `Tâche automatique · ${formatDueLabel(autoTask.due_date, today)}` : 'Tâche automatique'}
+            subtitle={
+              autoTask.due_date
+                ? `Tâche automatique · ${formatDueLabel(autoTask.due_date, today)}`
+                : 'Tâche automatique'
+            }
             left={<Repeat size={18} className="tint-icon" />}
             onClick={() => navigate('/tasks')}
           />
@@ -379,8 +391,8 @@ function ProspectionCard({
       {autoTask && (
         <CardNote>
           Relances automatiques : un mail, appel ou deck enregistré ci-dessous (ou la tâche cochée) programme la
-          suivante ; un RDV les arrête. Changer la date de relance déplace la tâche. Le recalcul se fait à la
-          prochaine ouverture de l’app mobile.
+          suivante ; un RDV les arrête. Changer la date de relance déplace la tâche. Le recalcul se fait à la prochaine
+          ouverture de l’app mobile.
         </CardNote>
       )}
       {stage === 'signe' && <CardNote>Deal signé : « Client actif » retire ce contact du pipeline.</CardNote>}

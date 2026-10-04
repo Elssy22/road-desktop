@@ -15,7 +15,14 @@ import {
   SegmentedControl,
   TextAction,
 } from '../../components/ui';
-import { listContacts, SEGMENT_LABELS, SEGMENTS, segmentLabel, type ContactSegment, type ContactWithLast } from '../../data/crm';
+import {
+  listContacts,
+  SEGMENT_LABELS,
+  SEGMENTS,
+  segmentLabel,
+  type ContactSegment,
+  type ContactWithLast,
+} from '../../data/crm';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { daysSinceContact, FOLLOW_UP_DAYS } from '../../lib/followUp';
 import { makeMatcher } from '../../lib/search';
@@ -121,7 +128,9 @@ export function ContactsScreen() {
                   key={c.id}
                   title={c.name || 'Sans nom'}
                   subtitle={[c.role, c.club, segmentLabel(c.segment)].filter(Boolean).join(' · ') || null}
-                  right={days >= FOLLOW_UP_DAYS ? <Badge label={`Relance · ${days} j`} color="var(--color-warning)" /> : null}
+                  right={
+                    days >= FOLLOW_UP_DAYS ? <Badge label={`Relance · ${days} j`} color="var(--color-warning)" /> : null
+                  }
                   onClick={() => navigate(`/agency/contacts/${c.id}`)}
                 />
               ))}

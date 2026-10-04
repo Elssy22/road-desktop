@@ -8,7 +8,15 @@ import { QuickAddTask } from '../components/QuickAddTask';
 import { ReminderRow } from '../components/ReminderRow';
 import { useTaskActions } from '../components/TaskActions';
 import { TaskRow } from '../components/TaskRow';
-import { CardList, CardNote, CategoryCard, ErrorBanner, GradientButton, ScreenHeader, TextAction } from '../components/ui';
+import {
+  CardList,
+  CardNote,
+  CategoryCard,
+  ErrorBanner,
+  GradientButton,
+  ScreenHeader,
+  TextAction,
+} from '../components/ui';
 import { listAppointmentsBetween, type AppointmentWithContact } from '../data/appointments';
 import { listKeyDatesBetween, type KeyDateWithContact } from '../data/keyDates';
 import { listOpenRemindersUntil, setReminderDone, type ReminderWithLinks } from '../data/reminders';

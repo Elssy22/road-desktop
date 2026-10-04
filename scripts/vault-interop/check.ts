@@ -58,10 +58,16 @@ const data = new TextEncoder().encode('Contrat confidentiel — ' + 'x'.repeat(5
 const meta = { name: 'contrat été.pdf', mime: 'application/pdf' };
 const webBlob = await web.encryptDocument(user, data, meta);
 const r1 = mDecrypt(mKey, webBlob);
-console.log('web → mobile :', JSON.stringify(r1.meta) === JSON.stringify(meta) && bytesToHex(r1.bytes) === bytesToHex(data));
+console.log(
+  'web → mobile :',
+  JSON.stringify(r1.meta) === JSON.stringify(meta) && bytesToHex(r1.bytes) === bytesToHex(data)
+);
 const mBlob = mEncrypt(mKey, user, data, meta);
 const r2 = await web.decryptDocument(user, new Uint8Array(mBlob));
-console.log('mobile → web :', JSON.stringify(r2.meta) === JSON.stringify(meta) && bytesToHex(r2.bytes) === bytesToHex(data));
+console.log(
+  'mobile → web :',
+  JSON.stringify(r2.meta) === JSON.stringify(meta) && bytesToHex(r2.bytes) === bytesToHex(data)
+);
 
 web.lockVault(user);
 try {

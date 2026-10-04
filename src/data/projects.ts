@@ -25,7 +25,11 @@ export const STATUS_LABELS: Record<string, string> = {
 
 /** Couleur du badge de statut (statusColor du mobile, en variables CSS). */
 export const statusColor = (status: string) =>
-  status === 'actif' ? 'var(--color-success)' : status === 'en_pause' ? 'var(--color-warning)' : 'var(--color-text-faint)';
+  status === 'actif'
+    ? 'var(--color-success)'
+    : status === 'en_pause'
+      ? 'var(--color-warning)'
+      : 'var(--color-text-faint)';
 
 export type Project = BaseRow & {
   title: string;
@@ -55,7 +59,13 @@ export async function listProjects(): Promise<ProjectWithProgress[]> {
   type StepRow = Pick<ProjectStep, 'project_id' | 'done'>;
   const [projects, steps] = await Promise.all([
     fetchAll<Project>((from, to) =>
-      supabase.from(PROJECTS).select('*').is('deleted_at', null).order('updated_at', { ascending: false }).order('id').range(from, to)
+      supabase
+        .from(PROJECTS)
+        .select('*')
+        .is('deleted_at', null)
+        .order('updated_at', { ascending: false })
+        .order('id')
+        .range(from, to)
     ),
     fetchAll<StepRow>((from, to) =>
       supabase.from(STEPS).select('project_id, done').is('deleted_at', null).order('id').range(from, to)
@@ -88,9 +98,10 @@ export async function getProject(id: string): Promise<Project | null> {
 export async function projectTitles(ids: string[]): Promise<Map<string, string>> {
   const unique = [...new Set(ids)];
   if (unique.length === 0) return new Map();
-  const rows = unwrap(
-    await supabase.from(PROJECTS).select('id, title').in('id', unique).is('deleted_at', null)
-  ) as { id: string; title: string }[];
+  const rows = unwrap(await supabase.from(PROJECTS).select('id, title').in('id', unique).is('deleted_at', null)) as {
+    id: string;
+    title: string;
+  }[];
   return new Map(rows.map((r) => [r.id, r.title]));
 }
 

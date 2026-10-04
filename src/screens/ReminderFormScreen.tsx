@@ -129,7 +129,8 @@ function ReminderForm({ id }: { id?: string }) {
     setSaving(true);
     const ok = await run(async () => {
       // Heure modifiée vers le futur : le rappel redevient « à faire ».
-      if (reminder) await updateReminder(reminder.id, changedFields(reminder, inPast ? fields : { ...fields, done: false }));
+      if (reminder)
+        await updateReminder(reminder.id, changedFields(reminder, inPast ? fields : { ...fields, done: false }));
       else await addReminder({ ...fields, done: false });
     });
     setSaving(false);
@@ -201,7 +202,9 @@ function ReminderForm({ id }: { id?: string }) {
                   />
                 </FormField>
               </div>
-              {inPast && <CardNote tone="danger">Cette heure est déjà passée : aucune notification ne sera envoyée.</CardNote>}
+              {inPast && (
+                <CardNote tone="danger">Cette heure est déjà passée : aucune notification ne sera envoyée.</CardNote>
+              )}
             </div>
           </CategoryCard>
 

@@ -2,7 +2,17 @@ import { FileLock, FilePlus, Lock, LockOpen } from 'lucide-react';
 import { useCallback, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CardList, CardNote, CategoryCard, ErrorBanner, FormField, GradientButton, ListRow, ScreenHeader, TextAction } from '../../components/ui';
+import {
+  CardList,
+  CardNote,
+  CategoryCard,
+  ErrorBanner,
+  FormField,
+  GradientButton,
+  ListRow,
+  ScreenHeader,
+  TextAction,
+} from '../../components/ui';
 import { ContactSelect } from '../../components/ContactSelect';
 import { VaultPassphrasePanel } from '../../components/VaultPassphrasePanel';
 import { listContacts, type ContactWithLast } from '../../data/crm';
@@ -194,7 +204,9 @@ export function VaultScreen({ userId }: { userId: string }) {
                 <ListRow
                   key={d.id}
                   title={d.title || 'Sans titre'}
-                  subtitle={[d.contact_name, d.project_title, formatEditedLabel(d.created_at, today)].filter(Boolean).join(' · ')}
+                  subtitle={[d.contact_name, d.project_title, formatEditedLabel(d.created_at, today)]
+                    .filter(Boolean)
+                    .join(' · ')}
                   left={<FileLock size={18} className="tint-icon" />}
                   onClick={() => navigate(`/agency/vault/${d.id}`)}
                 />

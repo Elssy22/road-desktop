@@ -2,15 +2,7 @@ import { FileText, Phone, TrendingUp, UserRound } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import {
-  CardNote,
-  CategoryCard,
-  Chip,
-  ChipRow,
-  ErrorBanner,
-  FormField,
-  ScreenHeader,
-} from '../../components/ui';
+import { CardNote, CategoryCard, Chip, ChipRow, ErrorBanner, FormField, ScreenHeader } from '../../components/ui';
 import {
   addContact,
   getContact,
@@ -194,7 +186,12 @@ function ContactForm({ id }: { id?: string }) {
                 <ChipRow>
                   <Chip label="Aucun" selected={form.segment === null} onClick={() => patch({ segment: null })} />
                   {SEGMENTS.map((s) => (
-                    <Chip key={s} label={SEGMENT_LABELS[s]} selected={form.segment === s} onClick={() => patch({ segment: s })} />
+                    <Chip
+                      key={s}
+                      label={SEGMENT_LABELS[s]}
+                      selected={form.segment === s}
+                      onClick={() => patch({ segment: s })}
+                    />
                   ))}
                 </ChipRow>
               </FormField>
@@ -241,7 +238,11 @@ function ContactForm({ id }: { id?: string }) {
           <CategoryCard category="contacts" icon={TrendingUp} title="Prospection">
             <div className="form">
               <label className="toggle">
-                <input type="checkbox" checked={form.prospect} onChange={(e) => patch({ prospect: e.target.checked })} />
+                <input
+                  type="checkbox"
+                  checked={form.prospect}
+                  onChange={(e) => patch({ prospect: e.target.checked })}
+                />
                 Ce contact est un prospect en cours de démarchage
               </label>
               {form.prospect && (
@@ -249,7 +250,12 @@ function ContactForm({ id }: { id?: string }) {
                   <FormField label="Étape">
                     <ChipRow>
                       {PIPELINE_STAGES.map((s) => (
-                        <Chip key={s} label={PIPELINE_STAGE_LABELS[s]} selected={form.stage === s} onClick={() => patch({ stage: s })} />
+                        <Chip
+                          key={s}
+                          label={PIPELINE_STAGE_LABELS[s]}
+                          selected={form.stage === s}
+                          onClick={() => patch({ stage: s })}
+                        />
                       ))}
                     </ChipRow>
                   </FormField>

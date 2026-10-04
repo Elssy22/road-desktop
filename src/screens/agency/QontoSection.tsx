@@ -23,7 +23,9 @@ const EMPTY: QontoItem[] = [];
 
 /** "12 importés (Factures clients 4 · Devis 2 · Transactions 6)" */
 function describeImport(imported: Partial<Record<QontoKind, number>>, total: number): string {
-  const parts = KIND_ORDER.filter((k) => imported[k] !== undefined).map((k) => `${QONTO_KIND_LABELS[k]} ${imported[k]}`);
+  const parts = KIND_ORDER.filter((k) => imported[k] !== undefined).map(
+    (k) => `${QONTO_KIND_LABELS[k]} ${imported[k]}`
+  );
   return `${total} élément${total > 1 ? 's' : ''} importé${total > 1 ? 's' : ''}${parts.length ? ` (${parts.join(' · ')})` : ''}.`;
 }
 
@@ -88,7 +90,9 @@ export function QontoSection({ userId }: { userId: string }) {
       {error ? (
         <CardNote tone="danger">Données Qonto illisibles pour l’instant : {error}</CardNote>
       ) : groups.length === 0 ? (
-        loading ? null : <CardNote>Rien d’importé pour l’instant. Lance une synchronisation.</CardNote>
+        loading ? null : (
+          <CardNote>Rien d’importé pour l’instant. Lance une synchronisation.</CardNote>
+        )
       ) : (
         groups.map((group) => (
           <div key={group.key} className="qonto-group">
@@ -124,7 +128,9 @@ function QontoRow({ item, today, late }: { item: QontoItem; today: DateKey; late
         <span className="row__title row__title--strong">{item.label || 'Sans libellé'}</span>
         {dates.length > 0 && (
           <span className="row__meta">
-            <span className={late ? 'row__meta-item row__meta-item--danger' : 'row__meta-item'}>{dates.join(' · ')}</span>
+            <span className={late ? 'row__meta-item row__meta-item--danger' : 'row__meta-item'}>
+              {dates.join(' · ')}
+            </span>
           </span>
         )}
       </div>

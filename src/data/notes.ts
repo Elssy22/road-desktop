@@ -46,7 +46,11 @@ export const setNotePinned = (note: Note, pinned: boolean) => updateRow(NOTES, n
 export const softDeleteNote = (id: string) => softDeleteRow(NOTES, id);
 
 /** Première ligne non vide du corps, pour l'aperçu (et comme titre de secours). */
-export const firstLine = (body: string) => body.split('\n').find((l) => l.trim() !== '')?.trim() ?? '';
+export const firstLine = (body: string) =>
+  body
+    .split('\n')
+    .find((l) => l.trim() !== '')
+    ?.trim() ?? '';
 
 /** Titre affiché : le titre, sinon la première ligne du corps. */
 export const noteTitle = (n: Pick<Note, 'title' | 'body'>) => n.title.trim() || firstLine(n.body) || 'Sans titre';

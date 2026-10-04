@@ -76,9 +76,7 @@ export function groupQontoItems(items: QontoItem[], today: DateKey): QontoGroup[
       const [kind, status] = k.split(':');
       return { key: k, title: `${QONTO_KIND_LABELS[kind as QontoKind] ?? kind} · ${status}`, tone: 'muted' as const };
     });
-  return [...known, ...extra]
-    .filter((g) => byKey.has(g.key))
-    .map((g) => ({ ...g, data: byKey.get(g.key)! }));
+  return [...known, ...extra].filter((g) => byKey.has(g.key)).map((g) => ({ ...g, data: byKey.get(g.key)! }));
 }
 
 /** Lignes importées, les plus récentes d'abord. Nécessite le réseau. */

@@ -17,7 +17,8 @@ const LINK_INVALID = 'Ce lien de réinitialisation est invalide, expiré ou déj
 type Step = { name: 'checking' } | { name: 'form' } | { name: 'invalid'; message: string } | { name: 'done' };
 
 function linkErrorMessage(code: string): string {
-  if (code === 'otp_expired') return 'Ce lien a expiré ou a déjà été utilisé. Demande un nouveau lien de réinitialisation.';
+  if (code === 'otp_expired')
+    return 'Ce lien a expiré ou a déjà été utilisé. Demande un nouveau lien de réinitialisation.';
   return LINK_INVALID;
 }
 
@@ -74,7 +75,9 @@ export function ResetPasswordScreen({
       .setSession({ access_token: link.accessToken, refresh_token: link.refreshToken })
       .then(({ error: e }) =>
         setStep(
-          e ? { name: 'invalid', message: isAuthRetryableFetchError(e) ? NETWORK_ERROR : LINK_INVALID } : { name: 'form' }
+          e
+            ? { name: 'invalid', message: isAuthRetryableFetchError(e) ? NETWORK_ERROR : LINK_INVALID }
+            : { name: 'form' }
         )
       )
       .catch(() => setStep({ name: 'invalid', message: NETWORK_ERROR }));
@@ -144,7 +147,8 @@ export function ResetPasswordScreen({
       content = (
         <>
           <p className="muted">
-            Ton nouveau mot de passe est enregistré{layout === 'auth' ? '. Tu es connecté.' : ' (il vaut aussi sur le mobile).'}
+            Ton nouveau mot de passe est enregistré
+            {layout === 'auth' ? '. Tu es connecté.' : ' (il vaut aussi sur le mobile).'}
           </p>
           <div className="actions">
             <button type="button" className="button button--primary" onClick={() => onFinish()}>

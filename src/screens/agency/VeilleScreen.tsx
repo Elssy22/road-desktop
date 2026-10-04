@@ -1,9 +1,29 @@
-import { Copy, EyeOff, RefreshCw, Search, Send, SlidersHorizontal, Sparkles, Star, type LucideIcon } from 'lucide-react';
+import {
+  Copy,
+  EyeOff,
+  RefreshCw,
+  Search,
+  Send,
+  SlidersHorizontal,
+  Sparkles,
+  Star,
+  type LucideIcon,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ExternalLinkAction } from '../../components/ExternalLinkAction';
-import { Badge, CardList, CardNote, CategoryCard, Chip, ChipRow, ErrorBanner, ScreenHeader, TextAction } from '../../components/ui';
+import {
+  Badge,
+  CardList,
+  CardNote,
+  CategoryCard,
+  Chip,
+  ChipRow,
+  ErrorBanner,
+  ScreenHeader,
+  TextAction,
+} from '../../components/ui';
 import { notifyDataChanged } from '../../data/base';
 import {
   listTenderOffers,
@@ -17,7 +37,14 @@ import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
 import { formatEditedLabel, type DateKey } from '../../lib/dates';
 import { useToday } from '../../lib/useToday';
-import { deadlineLabel, fetchVeilleSettings, isUrgent, offersFor, syncBoamp, type VeilleSettings } from '../../lib/veille';
+import {
+  deadlineLabel,
+  fetchVeilleSettings,
+  isUrgent,
+  offersFor,
+  syncBoamp,
+  type VeilleSettings,
+} from '../../lib/veille';
 
 const EMPTY: TenderOffer[] = [];
 
@@ -145,11 +172,21 @@ export function VeilleScreen({ userId }: { userId: string }) {
 
         <ChipRow>
           {TENDER_STATUSES.map((s) => (
-            <Chip key={s} label={`${FILTER_LABELS[s]} · ${counts[s]}`} selected={filter === s} onClick={() => setFilter(s)} />
+            <Chip
+              key={s}
+              label={`${FILTER_LABELS[s]} · ${counts[s]}`}
+              selected={filter === s}
+              onClick={() => setFilter(s)}
+            />
           ))}
         </ChipRow>
 
-        <CategoryCard category="veille" icon={STATUS_ICONS[filter]} title={TENDER_STATUS_LABELS[filter]} count={visible.length}>
+        <CategoryCard
+          category="veille"
+          icon={STATUS_ICONS[filter]}
+          title={TENDER_STATUS_LABELS[filter]}
+          count={visible.length}
+        >
           {visible.length > 0 ? (
             <CardList>
               {visible.map((o) => (

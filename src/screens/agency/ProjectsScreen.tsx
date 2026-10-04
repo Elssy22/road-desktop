@@ -36,10 +36,7 @@ export function ProjectsScreen() {
   // Par défaut on montre les projets actifs, le reste est à un clic.
   const [filter, setFilter] = useState<ProjectStatus | null>('actif');
 
-  const visible = useMemo(
-    () => (filter ? projects.filter((p) => p.status === filter) : projects),
-    [projects, filter]
-  );
+  const visible = useMemo(() => (filter ? projects.filter((p) => p.status === filter) : projects), [projects, filter]);
 
   const count = (s: ProjectStatus | null) => (s ? projects.filter((p) => p.status === s).length : projects.length);
 
@@ -58,7 +55,12 @@ export function ProjectsScreen() {
         <QuickAddTask placeholder="Nouveau projet (ex. Transfert de X)" withDue={false} onAdd={create} />
         <ChipRow>
           {PROJECT_STATUSES.map((s) => (
-            <Chip key={s} label={`${STATUS_LABELS[s]} · ${count(s)}`} selected={filter === s} onClick={() => setFilter(s)} />
+            <Chip
+              key={s}
+              label={`${STATUS_LABELS[s]} · ${count(s)}`}
+              selected={filter === s}
+              onClick={() => setFilter(s)}
+            />
           ))}
           <Chip label={`Tous · ${count(null)}`} selected={filter === null} onClick={() => setFilter(null)} />
         </ChipRow>
@@ -83,7 +85,9 @@ export function ProjectsScreen() {
               ))}
             </CardList>
           ) : loading ? null : (
-            <CardNote>{projects.length ? 'Aucun projet avec ce statut.' : 'Aucun projet. Ajoute-en un ci-dessus.'}</CardNote>
+            <CardNote>
+              {projects.length ? 'Aucun projet avec ce statut.' : 'Aucun projet. Ajoute-en un ci-dessus.'}
+            </CardNote>
           )}
         </CategoryCard>
       </div>

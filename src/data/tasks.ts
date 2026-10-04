@@ -54,9 +54,10 @@ export const listTasks = (): Promise<Task[]> => {
 /** Titres des tâches vivantes `ids` (pour les rappels liés). */
 export async function taskTitles(ids: string[]): Promise<Map<string, string>> {
   if (ids.length === 0) return new Map();
-  const rows = unwrap(
-    await supabase.from(TASKS).select('id, title').in('id', ids).is('deleted_at', null)
-  ) as { id: string; title: string }[];
+  const rows = unwrap(await supabase.from(TASKS).select('id, title').in('id', ids).is('deleted_at', null)) as {
+    id: string;
+    title: string;
+  }[];
   return new Map(rows.map((r) => [r.id, r.title]));
 }
 

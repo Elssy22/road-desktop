@@ -127,8 +127,8 @@ export function SettingsScreen() {
 
         <CategoryCard category="keyDates" icon={Smartphone} title="Sur le mobile">
           <CardNote>
-            Les notifications (rappels, debriefs de RDV, échéances) et le verrouillage par Face ID se règlent dans
-            l’app mobile : la version Mac n’envoie pas de notification.
+            Les notifications (rappels, debriefs de RDV, échéances) et le verrouillage par Face ID se règlent dans l’app
+            mobile : la version Mac n’envoie pas de notification.
           </CardNote>
         </CategoryCard>
       </div>

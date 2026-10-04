@@ -113,7 +113,15 @@ export function CardNote({ children, tone = 'muted' }: { children: ReactNode; to
 }
 
 /** Action principale d'un écran : pastille en dégradé soleil couchant. */
-export function GradientButton({ label, icon: Icon, onClick }: { label: string; icon?: LucideIcon; onClick: () => void }) {
+export function GradientButton({
+  label,
+  icon: Icon,
+  onClick,
+}: {
+  label: string;
+  icon?: LucideIcon;
+  onClick: () => void;
+}) {
   return (
     <button type="button" className="gradient-button" onClick={onClick}>
       {Icon && <Icon size={18} />}
@@ -286,8 +294,18 @@ export function FormField({
 export function ProgressBar({ value, label }: { value: number; label?: string }) {
   const pct = Math.min(100, Math.max(0, value));
   return (
-    <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={label}>
-      <div className={pct >= 100 ? 'progress__fill progress__fill--done' : 'progress__fill'} style={{ width: `${pct}%` }} />
+    <div
+      className="progress"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={pct}
+      aria-label={label}
+    >
+      <div
+        className={pct >= 100 ? 'progress__fill progress__fill--done' : 'progress__fill'}
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }

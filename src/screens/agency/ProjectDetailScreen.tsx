@@ -1,4 +1,15 @@
-import { CheckCircle2, ChevronDown, ChevronUp, Circle, GitBranch, Link2, ListChecks, ListTodo, Trash2, Unlink } from 'lucide-react';
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Circle,
+  GitBranch,
+  Link2,
+  ListChecks,
+  ListTodo,
+  Trash2,
+  Unlink,
+} from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -91,7 +102,9 @@ export function ProjectDetailScreen() {
       confirmLabel: 'Supprimer',
       danger: true,
       onConfirm: () =>
-        void run(() => softDeleteProject(project.id)).then((ok) => ok && navigate('/agency/projects', { replace: true })),
+        void run(() => softDeleteProject(project.id)).then(
+          (ok) => ok && navigate('/agency/projects', { replace: true })
+        ),
     });
 
   const confirmDeleteStep = (s: ProjectStep) =>
@@ -153,7 +166,11 @@ export function ProjectDetailScreen() {
             icon={ListChecks}
             title={steps.length ? `Étapes · ${done}/${steps.length}` : 'Étapes'}
           >
-            <QuickAddTask placeholder="Nouvelle étape" withDue={false} onAdd={(title) => void run(() => addStep(project.id, title))} />
+            <QuickAddTask
+              placeholder="Nouvelle étape"
+              withDue={false}
+              onAdd={(title) => void run(() => addStep(project.id, title))}
+            />
             {steps.length > 0 ? (
               <CardList>
                 {steps.map((s, idx) => (
@@ -360,7 +377,9 @@ function LinkTaskDialog({ onClose, onPick }: { onClose: () => void; onPick: (tas
     <Dialog title="Lier une tâche existante" onClose={onClose}>
       <ErrorBanner message={error} />
       {tasks.length === 0 ? (
-        loading ? null : <p className="dialog__message">Aucune tâche à faire sans projet.</p>
+        loading ? null : (
+          <p className="dialog__message">Aucune tâche à faire sans projet.</p>
+        )
       ) : (
         <div className="dialog__options dialog__list">
           {tasks.map((t) => (

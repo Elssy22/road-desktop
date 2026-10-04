@@ -204,7 +204,12 @@ function MoneyForm({ id }: { id?: string }) {
               <FormField label="Statut">
                 <ChipRow>
                   {FORM_STATUSES.map((s) => (
-                    <Chip key={s} label={MONEY_STATUS_LABELS[s]} selected={form.status === s} onClick={() => patch({ status: s })} />
+                    <Chip
+                      key={s}
+                      label={MONEY_STATUS_LABELS[s]}
+                      selected={form.status === s}
+                      onClick={() => patch({ status: s })}
+                    />
                   ))}
                 </ChipRow>
               </FormField>

@@ -57,8 +57,7 @@ export function PipelineScreen() {
     const matches = makeMatcher(query);
     return contacts.filter(
       (c) =>
-        c.pipeline_stage !== null &&
-        matches(c.name, c.role, c.club ?? '', c.notes ?? '', segmentLabel(c.segment) ?? '')
+        c.pipeline_stage !== null && matches(c.name, c.role, c.club ?? '', c.notes ?? '', segmentLabel(c.segment) ?? '')
     );
   }, [contacts, query]);
 
@@ -76,7 +75,11 @@ export function PipelineScreen() {
     if (stage === c.pipeline_stage) return;
     void run(() => setPipelineStage(c, stage));
     if (stage === 'signe') {
-      askMarkAsActiveClient(confirm, c.name, () => void run(() => setPipelineStage({ ...c, pipeline_stage: stage }, null)));
+      askMarkAsActiveClient(
+        confirm,
+        c.name,
+        () => void run(() => setPipelineStage({ ...c, pipeline_stage: stage }, null))
+      );
     }
   };
 

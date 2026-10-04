@@ -33,7 +33,9 @@ export function NoteRow({
         onClick={() => onOpen(note)}
         aria-current={active ? 'page' : undefined}
       >
-        <span className={empty ? 'row__title row__title--faint' : 'row__title row__title--strong'}>{noteTitle(note)}</span>
+        <span className={empty ? 'row__title row__title--faint' : 'row__title row__title--strong'}>
+          {noteTitle(note)}
+        </span>
         <span className="row__subtitle note-row__preview">
           <span className="note-row__date">{formatEditedLabel(note.updated_at, today)}</span>
           {preview ? `  ${preview.replace(/\s+/g, ' ')}` : ''}

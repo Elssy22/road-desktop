@@ -22,9 +22,10 @@ import {
 export async function contactNames(ids: string[]): Promise<Map<string, string>> {
   const unique = [...new Set(ids)];
   if (unique.length === 0) return new Map();
-  const rows = unwrap(
-    await supabase.from('contacts').select('id, name').in('id', unique).is('deleted_at', null)
-  ) as { id: string; name: string }[];
+  const rows = unwrap(await supabase.from('contacts').select('id, name').in('id', unique).is('deleted_at', null)) as {
+    id: string;
+    name: string;
+  }[];
   return new Map(rows.map((r) => [r.id, r.name]));
 }
 
@@ -161,7 +162,9 @@ async function latestByContact(table: string, column: string): Promise<Map<strin
 /** Contacts vivants avec leur dernière interaction, par nom (insensible à la casse). */
 export async function listContacts(): Promise<ContactWithLast[]> {
   const [contacts, last] = await Promise.all([
-    fetchAll<Contact>((from, to) => supabase.from(CONTACTS).select('*').is('deleted_at', null).order('id').range(from, to)),
+    fetchAll<Contact>((from, to) =>
+      supabase.from(CONTACTS).select('*').is('deleted_at', null).order('id').range(from, to)
+    ),
     latestByContact(INTERACTIONS, 'happened_at'),
   ]);
   return contacts
@@ -277,7 +280,7 @@ export async function addImportedContacts(userId: string, rows: Fields<Contact>[
   unwrap(await supabase.from(CONTACTS).insert(contacts));
 }
 
-export const updateContact =(id: string, patch: Partial<Fields<Contact>>) => updateRow(CONTACTS, id, patch);
+export const updateContact = (id: string, patch: Partial<Fields<Contact>>) => updateRow(CONTACTS, id, patch);
 
 /** Change l'étape de prospection (null = « client actif », sorti du pipeline). */
 export const setPipelineStage = (contact: Contact, stage: PipelineStage | null) =>
@@ -340,13 +343,7 @@ const namePattern = (name: string) =>
   new RegExp(`(?<![\\p{L}\\p{N}])${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'giu');
 
 /** Remplace le nom dans les colonnes `columns` des lignes de `table` qui le contiennent. */
-async function scrubName(
-  table: string,
-  columns: string[],
-  rows: Record<string, unknown>[],
-  name: string,
-  ts: string
-) {
+async function scrubName(table: string, columns: string[], rows: Record<string, unknown>[], name: string, ts: string) {
   const pattern = namePattern(name);
   for (const row of rows) {
     const patch: Record<string, string> = {};
@@ -355,7 +352,12 @@ async function scrubName(
       if (typeof value === 'string' && value.search(pattern) >= 0) patch[c] = value.replace(pattern, PURGED_NAME);
     }
     if (Object.keys(patch).length > 0) {
-      unwrap(await supabase.from(table).update({ ...patch, updated_at: ts }).eq('id', row.id as string));
+      unwrap(
+        await supabase
+          .from(table)
+          .update({ ...patch, updated_at: ts })
+          .eq('id', row.id as string)
+      );
     }
   }
 }
@@ -367,7 +369,10 @@ async function scrubContactName(contactId: string, ts: string) {
   if (!name) return;
   for (const [table, columns] of Object.entries(LINKED_TEXT_COLUMNS)) {
     const linked = unwrap(
-      await supabase.from(table).select(['id', ...columns].join(', ')).eq('contact_id', contactId)
+      await supabase
+        .from(table)
+        .select(['id', ...columns].join(', '))
+        .eq('contact_id', contactId)
     ) as unknown as Record<string, unknown>[];
     await scrubName(table, columns, linked, name, ts);
   }
@@ -407,5 +412,10 @@ async function deleteContactRows(contactId: string, anonymize: boolean) {
   const personal = anonymize
     ? { name: '', role: '', club: null, phone: null, email: null, notes: null, pipeline_amount: null }
     : {};
-  unwrap(await supabase.from(CONTACTS).update({ ...personal, ...tombstone }).eq('id', contactId));
+  unwrap(
+    await supabase
+      .from(CONTACTS)
+      .update({ ...personal, ...tombstone })
+      .eq('id', contactId)
+  );
 }
