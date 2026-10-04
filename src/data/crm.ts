@@ -232,7 +232,28 @@ export async function listProspectsForRetention(): Promise<RetentionRow[]> {
 
 export const addContact = (fields: Fields<Contact>) => insertRow(CONTACTS, fields);
 
-export const updateContact = (id: string, patch: Partial<Fields<Contact>>) => updateRow(CONTACTS, id, patch);
+/** Noms des contacts vivants (dédoublonnage de l'import de fichier). */
+export async function listContactNameValues(): Promise<string[]> {
+  const rows = await fetchAll<{ name: string }>((from, to) =>
+    supabase.from(CONTACTS).select('name').is('deleted_at', null).order('id').range(from, to)
+  );
+  return rows.map((r) => r.name);
+}
+
+/**
+ * Insère plusieurs contacts en une requête (un lot de l'import de fichier).
+ * Pas de notifyDataChanged ici : l'écran d'import prévient une fois à la fin.
+ */
+export async function addContacts(rows: Fields<Contact>[]) {
+  const ts = new Date().toISOString();
+  unwrap(
+    await supabase
+      .from(CONTACTS)
+      .insert(rows.map((fields) => ({ ...fields, id: crypto.randomUUID(), created_at: ts, updated_at: ts })))
+  );
+}
+
+export const updateContact =(id: string, patch: Partial<Fields<Contact>>) => updateRow(CONTACTS, id, patch);
 
 /** Change l'étape de prospection (null = « client actif », sorti du pipeline). */
 export const setPipelineStage = (contact: Contact, stage: PipelineStage | null) =>
