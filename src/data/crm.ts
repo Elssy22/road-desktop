@@ -306,10 +306,13 @@ export async function softDeleteContact(contactId: string) {
 }
 
 /**
- * Purge RGPD (DECISIONS.md §32) : comme softDeleteContact, mais les données
- * personnelles sont d'abord effacées (nom, coordonnées, notes, montant ;
+ * Purge RGPD (DECISIONS.md §32 et §36) : comme softDeleteContact, mais les
+ * données personnelles sont d'abord effacées (nom, coordonnées, notes, montant ;
  * résumés des interactions et titres des tâches, lignes déjà supprimées
- * comprises). Restent l'id, les dates, le segment et l'étape.
+ * comprises). Dans les éléments liés conservés (RDV, rappels, dates clés,
+ * finances, documents) et dans les notes qui le citent (« CR RDV · Nom »), le
+ * nom du contact est remplacé. Restent l'id, les dates, le segment et l'étape ;
+ * une mention du contact sous une autre forme (prénom seul, surnom) n'est pas détectée.
  */
 export async function purgeContacts(contactIds: string[]) {
   try {
@@ -320,10 +323,73 @@ export async function purgeContacts(contactIds: string[]) {
   }
 }
 
+/** Remplace le nom purgé dans les textes conservés. */
+const PURGED_NAME = '[contact supprimé]';
+
+/** Colonnes de texte libre des tables liées à un contact (cf. DETACHED_ON_DELETE). */
+const LINKED_TEXT_COLUMNS: Record<string, string[]> = {
+  money_items: ['label'],
+  documents: ['title'],
+  reminders: ['title'],
+  appointments: ['title', 'location', 'notes'],
+  key_dates: ['title', 'notes'],
+};
+
+/** Occurrences du nom (mot entier, casse ignorée) dans un texte. */
+const namePattern = (name: string) =>
+  new RegExp(`(?<![\\p{L}\\p{N}])${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'giu');
+
+/** Remplace le nom dans les colonnes `columns` des lignes de `table` qui le contiennent. */
+async function scrubName(
+  table: string,
+  columns: string[],
+  rows: Record<string, unknown>[],
+  name: string,
+  ts: string
+) {
+  const pattern = namePattern(name);
+  for (const row of rows) {
+    const patch: Record<string, string> = {};
+    for (const c of columns) {
+      const value = row[c];
+      if (typeof value === 'string' && value.search(pattern) >= 0) patch[c] = value.replace(pattern, PURGED_NAME);
+    }
+    if (Object.keys(patch).length > 0) {
+      unwrap(await supabase.from(table).update({ ...patch, updated_at: ts }).eq('id', row.id as string));
+    }
+  }
+}
+
+/** Nom du contact retiré des éléments liés et des notes qui le citent. */
+async function scrubContactName(contactId: string, ts: string) {
+  const rows = unwrap(await supabase.from(CONTACTS).select('name').eq('id', contactId)) as { name: string }[];
+  const name = rows[0]?.name.trim();
+  if (!name) return;
+  for (const [table, columns] of Object.entries(LINKED_TEXT_COLUMNS)) {
+    const linked = unwrap(
+      await supabase.from(table).select(['id', ...columns].join(', ')).eq('contact_id', contactId)
+    ) as unknown as Record<string, unknown>[];
+    await scrubName(table, columns, linked, name, ts);
+  }
+  // Notes : pas de lien vers le contact, recherche du nom dans le titre puis
+  // dans le texte (un filtre par requête : jamais de saisie dans un .or()),
+  // contrôle exact côté client.
+  const like = `%${name.replace(/[\\%_]/g, '\\$&')}%`;
+  const notes = new Map<string, Record<string, unknown>>();
+  for (const column of ['title', 'body']) {
+    const found = unwrap(await supabase.from('notes').select('id, title, body').ilike(column, like)) as unknown as {
+      id: string;
+    }[];
+    for (const n of found) notes.set(n.id, n);
+  }
+  await scrubName('notes', ['title', 'body'], [...notes.values()], name, ts);
+}
+
 async function deleteContactRows(contactId: string, anonymize: boolean) {
   const ts = new Date().toISOString();
   const tombstone = { deleted_at: ts, updated_at: ts };
   if (anonymize) {
+    await scrubContactName(contactId, ts);
     unwrap(await supabase.from(INTERACTIONS).update({ summary: '', updated_at: ts }).eq('contact_id', contactId));
     unwrap(await supabase.from('tasks').update({ title: '', updated_at: ts }).eq('contact_id', contactId));
   }
