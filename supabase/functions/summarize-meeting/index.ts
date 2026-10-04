@@ -4,8 +4,8 @@
 // (note, tâches) seulement après validation explicite de l'utilisateur.
 //
 // Déploiement : supabase functions deploy summarize-meeting
-// Secret requis : OPENROUTER_API_KEY. Facultatif : SUMMARIZE_ALLOWED_USER_IDS
-// (cf. DECISIONS.md §15).
+// Secrets requis : OPENROUTER_API_KEY et SUMMARIZE_ALLOWED_USER_IDS (uuid des
+// comptes autorisés, séparés par des virgules ; cf. DECISIONS.md §15 et §36).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
@@ -227,13 +227,14 @@ Deno.serve(async (req) => {
     const userId = userData?.user?.id;
     if (userError || !userId) throw new FnError('Session invalide ou expirée. Reconnecte-toi.', 401, 'unauthenticated');
 
-    // 2. Autorisation facultative (coût OpenRouter) : si le secret est défini,
-    // seuls ces comptes peuvent appeler la fonction.
+    // 2. Autorisation (coût OpenRouter) : seuls les comptes listés dans le
+    // secret peuvent appeler la fonction ; secret absent = personne (comme
+    // qonto-sync), pour qu'un compte créé par un inconnu ne vide pas le crédit.
     const allowed = (Deno.env.get('SUMMARIZE_ALLOWED_USER_IDS') ?? '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
-    if (allowed.length > 0 && !allowed.includes(userId)) {
+    if (!allowed.includes(userId)) {
       throw new FnError('Compte non autorisé à utiliser le résumé IA.', 403, 'forbidden');
     }
 

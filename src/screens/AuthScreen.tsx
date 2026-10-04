@@ -4,8 +4,10 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { useSession } from '../auth/SessionProvider';
 import { supabase } from '../lib/supabase';
 
-// Portage web de mobile-legacy/src/screens/AuthScreen.tsx : même logique
-// (connexion, création de compte, mot de passe oublié), en HTML standard.
+// Portage web de mobile-legacy/src/screens/AuthScreen.tsx (connexion, mot de
+// passe oublié), en HTML standard. Pas de création de compte : Road est mono-
+// utilisateur, et la clé anon embarquée dans l'app permettrait à n'importe qui
+// de s'inscrire (DECISIONS.md §36, B2 ; inscriptions aussi à couper côté Supabase).
 
 type Notice = { text: string; tone: 'error' | 'info' };
 
@@ -59,18 +61,12 @@ export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' 
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
 
-  const run = async (action: 'signIn' | 'signUp') => {
+  const signIn = async () => {
     setBusy(true);
     setNotice(null);
-    const credentials = { email: email.trim(), password };
     try {
-      const { data, error } =
-        action === 'signIn'
-          ? await supabase.auth.signInWithPassword(credentials)
-          : await supabase.auth.signUp(credentials);
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) setNotice({ text: error.message, tone: 'error' });
-      else if (action === 'signUp' && !data.session)
-        setNotice({ text: 'Compte créé : confirme ton email puis connecte-toi.', tone: 'error' });
     } catch {
       setNotice({ text: NETWORK_ERROR, tone: 'error' });
     } finally {
@@ -110,7 +106,7 @@ export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
-    void (forgot ? sendReset() : run('signIn'));
+    void (forgot ? sendReset() : signIn());
   };
 
   const message = notice ?? (sessionError ? { text: `Session : ${sessionError}`, tone: 'error' as const } : null);
@@ -157,9 +153,6 @@ export function AuthScreen({ initialMode = 'signIn' }: { initialMode?: 'signIn' 
           <div className="actions">
             <button className="button button--primary" type="submit" disabled={busy}>
               {busy ? 'Connexion…' : 'Se connecter'}
-            </button>
-            <button className="button button--secondary" type="button" disabled={busy} onClick={() => void run('signUp')}>
-              Créer un compte
             </button>
             <button className="link" type="button" onClick={() => switchMode('forgot')}>
               Mot de passe oublié ?
