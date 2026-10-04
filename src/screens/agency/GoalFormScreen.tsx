@@ -1,6 +1,6 @@
 import { Banknote, Flag, Minus, Plus, TrendingUp, Trophy } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { useConfirm } from '../../components/Dialog';
 import {
@@ -33,6 +33,7 @@ import { CA_PERIODS, caPeriodBounds, caProgress, formatCaPeriod, type CaPeriod, 
 import type { DateKey } from '../../lib/dates';
 import { errorMessage } from '../../lib/errors';
 import { amountToInput, formatEuros, parseAmount } from '../../lib/money';
+import { useFormExit } from '../../lib/useFormExit';
 
 type Form = {
   title: string;
@@ -81,7 +82,7 @@ export function GoalFormScreen({ userId }: { userId: string }) {
 }
 
 function GoalForm({ id, userId }: { id?: string; userId: string }) {
-  const navigate = useNavigate();
+  const goBack = useFormExit('/agency/goals');
   const { run, error: writeError } = useWrite();
   const { confirm, dialog } = useConfirm();
   const [form, setForm] = useState<Form>(EMPTY_FORM);
@@ -160,7 +161,7 @@ function GoalForm({ id, userId }: { id?: string; userId: string }) {
       else await addGoal(fields);
     });
     setSaving(false);
-    if (ok) navigate('/agency/goals');
+    if (ok) goBack();
   };
 
   const confirmDelete = () => {
@@ -170,7 +171,7 @@ function GoalForm({ id, userId }: { id?: string; userId: string }) {
       message: goal.title || undefined,
       confirmLabel: 'Supprimer',
       danger: true,
-      onConfirm: () => void run(() => softDeleteGoal(goal.id)).then((ok) => ok && navigate('/agency/goals', { replace: true })),
+      onConfirm: () => void run(() => softDeleteGoal(goal.id)).then((ok) => ok && goBack()),
     });
   };
 
@@ -331,7 +332,7 @@ function GoalForm({ id, userId }: { id?: string; userId: string }) {
                 Supprimer l’objectif
               </button>
             )}
-            <button type="button" className="button button--ghost" onClick={() => navigate('/agency/goals')}>
+            <button type="button" className="button button--ghost" onClick={goBack}>
               Annuler
             </button>
             <button type="submit" className="button button--primary" disabled={!canSave}>

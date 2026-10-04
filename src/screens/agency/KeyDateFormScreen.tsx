@@ -1,6 +1,6 @@
 import { Hourglass, Link2 } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { useConfirm } from '../../components/Dialog';
 import { ContactSelect } from '../../components/ContactSelect';
@@ -20,6 +20,7 @@ import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
 import { changedFields } from '../../data/base';
 import { formatDueLabel, type DateKey } from '../../lib/dates';
+import { useFormExit } from '../../lib/useFormExit';
 import { useToday } from '../../lib/useToday';
 
 type Form = { title: string; date: DateKey | null; category: string; contact_id: string | null; notes: string };
@@ -45,11 +46,9 @@ export function KeyDateFormScreen() {
 }
 
 function KeyDateForm({ id }: { id?: string }) {
-  const navigate = useNavigate();
-  const location = useLocation();
   // Ouvert depuis l'échéancier, la Vue du jour ou le calendrier : retour à l'écran
   // d'origine ; ouvert directement (rechargement), retour à l'échéancier.
-  const goBack = () => (location.key === 'default' ? navigate('/agency/key-dates', { replace: true }) : navigate(-1));
+  const goBack = useFormExit('/agency/key-dates');
   const today = useToday();
   const { run, error: writeError } = useWrite();
   const { confirm, dialog } = useConfirm();

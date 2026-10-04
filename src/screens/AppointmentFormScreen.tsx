@@ -1,6 +1,6 @@
 import { CalendarDays, Link2, MapPin, NotebookPen, Search } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { useConfirm } from '../components/Dialog';
 import { ContactSelect } from '../components/ContactSelect';
@@ -23,6 +23,7 @@ import { useWrite } from '../data/useWrite';
 import { changedFields } from '../data/base';
 import { canSearchAddress, searchAddress, type AddressSuggestion } from '../lib/addressSearch';
 import { formatDueLabel, fromDateKey, toDateKey, type DateKey } from '../lib/dates';
+import { useFormExit } from '../lib/useFormExit';
 import { useToday } from '../lib/useToday';
 
 /** Heure locale « HH:MM » (valeur d'un <input type="time">). */
@@ -87,11 +88,10 @@ export function AppointmentFormScreen() {
 
 function AppointmentForm({ id }: { id?: string }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [params] = useSearchParams();
   // Ouvert depuis la Vue du jour ou le calendrier : retour à l'écran d'origine ;
   // ouvert directement (rechargement), retour au calendrier.
-  const goBack = () => (location.key === 'default' ? navigate('/calendar', { replace: true }) : navigate(-1));
+  const goBack = useFormExit('/calendar');
   const today = useToday();
   const { run, error: writeError } = useWrite();
   const { confirm, dialog } = useConfirm();

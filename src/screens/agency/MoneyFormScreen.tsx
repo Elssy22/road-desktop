@@ -1,6 +1,6 @@
 import { Link2, Tags, Wallet } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { useConfirm } from '../../components/Dialog';
 import { ContactSelect } from '../../components/ContactSelect';
@@ -24,6 +24,7 @@ import { useWrite } from '../../data/useWrite';
 import { changedFields } from '../../data/base';
 import { formatDueLabel, type DateKey } from '../../lib/dates';
 import { amountToInput, parseAmount } from '../../lib/money';
+import { useFormExit } from '../../lib/useFormExit';
 import { useToday } from '../../lib/useToday';
 
 type Form = {
@@ -73,8 +74,7 @@ export function MoneyFormScreen() {
 }
 
 function MoneyForm({ id }: { id?: string }) {
-  const navigate = useNavigate();
-  const goBack = () => navigate('/agency/money');
+  const goBack = useFormExit('/agency/money');
   const today = useToday();
   const { run, error: writeError } = useWrite();
   const { confirm, dialog } = useConfirm();

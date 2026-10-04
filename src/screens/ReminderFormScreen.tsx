@@ -1,6 +1,6 @@
 import { AlarmClock, Link2 } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { useConfirm } from '../components/Dialog';
 import { ContactSelect } from '../components/ContactSelect';
@@ -20,6 +20,7 @@ import { useRemoteQuery } from '../data/useRemoteQuery';
 import { useWrite } from '../data/useWrite';
 import { changedFields } from '../data/base';
 import { formatDueLabel, fromDateKey, toDateKey, type DateKey } from '../lib/dates';
+import { useFormExit } from '../lib/useFormExit';
 import { useToday } from '../lib/useToday';
 
 type Form = {
@@ -59,12 +60,10 @@ export function ReminderFormScreen() {
 }
 
 function ReminderForm({ id }: { id?: string }) {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [params] = useSearchParams();
   // Ouvert depuis une tâche, une fiche contact ou le calendrier : retour à l'écran
   // d'origine ; ouvert directement (rechargement), retour à la Vue du jour.
-  const goBack = () => (location.key === 'default' ? navigate('/today', { replace: true }) : navigate(-1));
+  const goBack = useFormExit('/today');
   const today = useToday();
   const { run, error: writeError } = useWrite();
   const { confirm, dialog } = useConfirm();
