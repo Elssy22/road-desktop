@@ -18,6 +18,7 @@ import {
 } from '../data/notes';
 import { useRemoteQuery } from '../data/useRemoteQuery';
 import { useWrite } from '../data/useWrite';
+import { readStored, removeStored, writeStored } from '../lib/localStore';
 import { makeMatcher } from '../lib/search';
 import { useToday } from '../lib/useToday';
 
@@ -126,6 +127,13 @@ const EMPTY: NoteContent = { title: '', body: '', pinned: false };
 const isEmpty = (c: NoteContent) => !c.title.trim() && !c.body.trim() && !c.pinned;
 const sameContent = (a: NoteContent, b: NoteContent) => a.title === b.title && a.body === b.body && a.pinned === b.pinned;
 
+/**
+ * Copie locale de la saisie, effacée dès que Supabase a confirmé ce contenu :
+ * un échec d'enregistrement en quittant l'éditeur, ou la fenêtre fermée pendant
+ * le délai de sauvegarde, ne perd plus le texte (restauré à la réouverture).
+ */
+const draftKey = (noteId: string) => `notes:draft:${noteId}`;
+
 /** Champs modifiés depuis la dernière version enregistrée. */
 function changes(from: NoteContent, to: NoteContent): Partial<NoteContent> {
   const patch: Partial<NoteContent> = {};
@@ -158,6 +166,7 @@ function NoteEditor({
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing'>(isNew ? 'ready' : 'loading');
   const [draft, setDraft] = useState<NoteContent>(EMPTY);
   const [error, setError] = useState<string | null>(null);
+  const [restored, setRestored] = useState(false);
   const { confirm, dialog } = useConfirm();
 
   // Source de vérité des sauvegardes différées (lues hors du rendu).
@@ -194,11 +203,18 @@ function NoteEditor({
           return;
         }
         const content = { title: note.title, body: note.body, pinned: note.pinned };
-        draftRef.current = content;
         savedRef.current = content;
         confirmedRef.current = content;
-        setDraft(content);
+        // Saisie restée non enregistrée lors d'une ouverture précédente : elle est
+        // reprise, et sera enregistrée au prochain délai de sauvegarde.
+        const local = readStored<NoteContent>(draftKey(noteId));
+        const pending = local && !sameContent(local, content) ? local : null;
+        if (!pending) removeStored(draftKey(noteId));
+        draftRef.current = pending ?? content;
+        setDraft(draftRef.current);
+        setRestored(!!pending);
         setStatus('ready');
+        if (pending) timerRef.current = setTimeout(() => flushRef.current(), SAVE_DEBOUNCE_MS);
       })
       .catch((e: unknown) => {
         if (!active) return;
@@ -235,6 +251,7 @@ function NoteEditor({
         if (confirmed) await updateNote(noteId, changes(confirmed, content));
         else await insertNote(noteId, content);
         confirmedRef.current = content;
+        if (sameContent(draftRef.current, content)) removeStored(draftKey(noteId));
         if (mountedRef.current) setError(null);
         if (!confirmed && mountedRef.current) onCreatedRef.current(noteId);
       } catch (e) {
@@ -245,12 +262,23 @@ function NoteEditor({
     });
   }, [noteId]);
 
-  // Sortie de l'éditeur (autre note, autre section) : on écrit ce qui reste.
-  useEffect(() => () => flush(), [flush]);
+  const flushRef = useRef(flush);
+  flushRef.current = flush;
+
+  // Sortie de l'éditeur (autre note, autre section) ou fermeture de la fenêtre :
+  // on écrit ce qui reste (la copie locale couvre un envoi qui n'aboutit pas).
+  useEffect(() => {
+    window.addEventListener('beforeunload', flush);
+    return () => {
+      window.removeEventListener('beforeunload', flush);
+      flush();
+    };
+  }, [flush]);
 
   const update = (patch: Partial<NoteContent>, immediate = false) => {
     draftRef.current = { ...draftRef.current, ...patch };
     setDraft(draftRef.current);
+    writeStored(draftKey(noteId), draftRef.current);
     if (timerRef.current) clearTimeout(timerRef.current);
     if (immediate) flush();
     else timerRef.current = setTimeout(flush, SAVE_DEBOUNCE_MS);
@@ -269,6 +297,7 @@ function NoteEditor({
         return;
       }
     }
+    removeStored(draftKey(noteId));
     onDeleted();
   };
 
@@ -301,6 +330,11 @@ function NoteEditor({
   return (
     <div className="stack">
       <ErrorBanner message={error} />
+      {restored && (
+        <p className="notice notice--info" role="status">
+          Saisie non enregistrée la dernière fois : elle a été reprise et va être enregistrée.
+        </p>
+      )}
       {/* Feuille blanche, liseré lavande de la catégorie Notes. */}
       <Panel className="note-editor">
         <div className="note-editor__toolbar">
