@@ -118,9 +118,45 @@ export function passphraseProblem(passphrase: string, confirmation: string): str
   return null;
 }
 
-/** Première utilisation (ou nouvel appareil) : enregistre le hash de vérification et déverrouille. */
+/**
+ * Document existant le plus récent (chiffré), ou null si le coffre est vide.
+ * Sert à vérifier une phrase saisie sur un nouvel appareil (B3, DECISIONS.md §36).
+ */
+async function existingSample(): Promise<Uint8Array<ArrayBuffer> | null> {
+  const { data, error } = await supabase
+    .from('documents')
+    .select('storage_path')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) throw new Error(`Vérification de la phrase impossible : ${error.message}`);
+  const path = (data as { storage_path: string }[])[0]?.storage_path;
+  if (!path) return null;
+  const { data: blob, error: downloadError } = await supabase.storage.from(VAULT_BUCKET).download(path);
+  if (downloadError || !blob) {
+    throw new Error(`Vérification de la phrase impossible : ${downloadError?.message ?? 'document absent'}`);
+  }
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+/**
+ * Première utilisation (ou nouvel appareil) : enregistre le hash de vérification et déverrouille.
+ * Si le coffre contient déjà des documents (chiffrés sur le mobile ou sur un
+ * autre Mac), la phrase doit en ouvrir un : sinon une faute de frappe créerait
+ * une seconde clé, et les nouveaux documents seraient illisibles avec l'ancienne.
+ */
 export async function setupVault(userId: string, passphrase: string) {
   const { key, verifier } = await deriveKey(userId, passphrase, KDF_ITERATIONS);
+  const sample = await existingSample();
+  if (sample) {
+    try {
+      await decryptWith(key, KDF_ITERATIONS, sample);
+    } catch {
+      throw new Error(
+        'Cette phrase n’ouvre pas les documents déjà présents dans le coffre. Saisis exactement la phrase choisie sur ton autre appareil.'
+      );
+    }
+  }
   const config: VaultConfig = { v: 1, iterations: KDF_ITERATIONS, verifier };
   localStorage.setItem(configKey(userId), JSON.stringify(config));
   session.set(userId, { key, iterations: KDF_ITERATIONS });
@@ -185,6 +221,14 @@ export async function decryptDocument(
   blob: Uint8Array<ArrayBuffer>
 ): Promise<{ meta: DocumentMeta; bytes: Uint8Array<ArrayBuffer> }> {
   const { key, iterations } = sessionKey(userId);
+  return decryptWith(key, iterations, blob);
+}
+
+async function decryptWith(
+  key: CryptoKey,
+  iterations: number,
+  blob: Uint8Array<ArrayBuffer>
+): Promise<{ meta: DocumentMeta; bytes: Uint8Array<ArrayBuffer> }> {
   if (blob.length <= HEADER_LEN || toHex(blob.slice(0, MAGIC.length)) !== toHex(MAGIC)) {
     throw new Error('Fichier illisible : ce n’est pas un document du coffre.');
   }
