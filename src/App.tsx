@@ -32,6 +32,7 @@ import { ReminderFormScreen } from './screens/ReminderFormScreen';
 import { ResetPasswordScreen } from './screens/ResetPasswordScreen';
 import { SearchScreen } from './screens/SearchScreen';
 import { ChangePasswordScreen, SettingsScreen } from './screens/SettingsScreen';
+import { SuggestionsScreen } from './screens/SuggestionsScreen';
 import { TasksScreen } from './screens/TasksScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { WeeklyReviewScreen } from './screens/WeeklyReviewScreen';
@@ -104,6 +105,7 @@ function Root() {
           <Route path="/notes" element={<NotesScreen />} />
           <Route path="/notes/:id" element={<NotesScreen />} />
           <Route path="/notes/*" element={<Navigate to="/notes" replace />} />
+          <Route path="/suggestions" element={<SuggestionsScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/settings/password" element={<ChangePasswordScreen />} />
           <Route path="/settings/*" element={<Navigate to="/settings" replace />} />

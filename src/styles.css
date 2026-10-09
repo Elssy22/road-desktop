@@ -2054,3 +2054,54 @@ button {
 .note-editor__body::placeholder {
   color: var(--color-text-faint);
 }
+
+/* --- Suggestions (mails) --- */
+
+/* Extrait du mail : citation sur fond blanc, liseré de la teinte de la carte. */
+.suggestion__snippet {
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-muted);
+  white-space: pre-line;
+  background: var(--color-surface);
+  border-left: 3px solid var(--tint-border);
+  border-radius: var(--radius-md);
+}
+
+.suggestion__proposal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xs) var(--space-sm);
+}
+
+.suggestion__kind {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tint-fg);
+}
+
+.suggestion__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.suggestion__date {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.suggestion__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-md);
+}
+
+.suggestion__actions .button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
