@@ -2057,7 +2057,7 @@ button {
 
 /* --- Suggestions (mails) --- */
 
-/* Extrait du mail : citation sur fond blanc, liseré de la teinte de la carte. */
+/* Extrait du mail : citation sur fond blanc, bordure fine de la teinte de la carte. */
 .suggestion__snippet {
   margin: 0;
   padding: var(--space-sm) var(--space-md);
@@ -2066,7 +2066,7 @@ button {
   color: var(--color-text-muted);
   white-space: pre-line;
   background: var(--color-surface);
-  border-left: 3px solid var(--tint-border);
+  border: 1px solid var(--tint-border);
   border-radius: var(--radius-md);
 }
 
