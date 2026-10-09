@@ -7,6 +7,7 @@ import {
   Link2,
   ListChecks,
   ListTodo,
+  NotebookPen,
   Trash2,
   Unlink,
 } from 'lucide-react';
@@ -27,6 +28,7 @@ import {
   SegmentedControl,
   TextAction,
 } from '../../components/ui';
+import { listProjectNotes, noteTitle, type Note } from '../../data/notes';
 import {
   addStep,
   getProject,
@@ -48,11 +50,11 @@ import {
 import { setTaskDone, setTaskProject, type Task } from '../../data/tasks';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
-import { formatDueLabel } from '../../lib/dates';
+import { formatDueLabel, formatEditedLabel } from '../../lib/dates';
 import { useToday } from '../../lib/useToday';
 
-type Detail = { project: Project | null; steps: ProjectStep[]; tasks: Task[] };
-const EMPTY: Detail = { project: null, steps: [], tasks: [] };
+type Detail = { project: Project | null; steps: ProjectStep[]; tasks: Task[]; notes: Note[] };
+const EMPTY: Detail = { project: null, steps: [], tasks: [], notes: [] };
 const NO_TASKS: Task[] = [];
 
 const STATUS_OPTIONS = PROJECT_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }));
@@ -67,11 +69,16 @@ export function ProjectDetailScreen() {
   const [linking, setLinking] = useState(false);
 
   const load = useCallback(async (): Promise<Detail> => {
-    const [project, steps, tasks] = await Promise.all([getProject(id), listSteps(id), listProjectTasks(id)]);
-    return { project, steps, tasks };
+    const [project, steps, tasks, notes] = await Promise.all([
+      getProject(id),
+      listSteps(id),
+      listProjectTasks(id),
+      listProjectNotes(id),
+    ]);
+    return { project, steps, tasks, notes };
   }, [id]);
   const { data, error, loading } = useRemoteQuery(load, EMPTY);
-  const { project, steps, tasks } = data;
+  const { project, steps, tasks, notes } = data;
 
   // Premier chargement, ou fiche précédente encore affichée après un changement d'URL.
   if (loading || (project && project.id !== id)) {
@@ -98,7 +105,7 @@ export function ProjectDetailScreen() {
   const confirmDelete = () =>
     confirm({
       title: 'Supprimer ce projet ?',
-      message: 'Ses étapes seront supprimées ; les tâches et objectifs liés sont conservés.',
+      message: 'Ses étapes seront supprimées ; les tâches, notes et objectifs liés sont conservés.',
       confirmLabel: 'Supprimer',
       danger: true,
       onConfirm: () =>
@@ -235,6 +242,23 @@ export function ProjectDetailScreen() {
               </CardList>
             ) : (
               <CardNote>Aucune tâche liée. Les tâches restent gérées dans la section Tâches.</CardNote>
+            )}
+          </CategoryCard>
+
+          <CategoryCard category="notes" icon={NotebookPen} title="Notes" count={notes.length}>
+            {notes.length > 0 ? (
+              <CardList>
+                {notes.map((n) => (
+                  <ListRow
+                    key={n.id}
+                    title={noteTitle(n)}
+                    subtitle={formatEditedLabel(n.updated_at, today)}
+                    onClick={() => navigate(`/notes/${n.id}`)}
+                  />
+                ))}
+              </CardList>
+            ) : (
+              <CardNote>Aucune note liée. Choisis ce projet dans « Projet lié » depuis l’éditeur d’une note.</CardNote>
             )}
           </CategoryCard>
         </div>

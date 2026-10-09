@@ -1994,6 +1994,18 @@ button {
   color: var(--color-text-faint);
 }
 
+.note-editor__project {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg) 0;
+}
+
+.note-editor__project-label {
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
 .note-editor__title,
 .note-editor__body {
   width: 100%;

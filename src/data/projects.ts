@@ -196,11 +196,11 @@ export async function moveStep(steps: ProjectStep[], index: number, delta: -1 | 
 }
 
 /** Tables dont le lien facultatif vers un projet est détaché à sa suppression. */
-const DETACHED_ON_DELETE = ['money_items', 'documents', 'appointments', 'goals', TASKS];
+const DETACHED_ON_DELETE = ['money_items', 'documents', 'appointments', 'goals', 'notes', TASKS];
 
 /**
  * Supprime le projet et ses étapes ; les tâches, objectifs, lignes financières,
- * documents et rendez-vous rattachés sont conservés mais détachés. Pas de
+ * documents, rendez-vous et notes rattachés sont conservés mais détachés. Pas de
  * transaction via PostgREST : le projet est supprimé en dernier, une erreur en
  * route laisse donc la fiche visible et la suppression peut être relancée.
  */

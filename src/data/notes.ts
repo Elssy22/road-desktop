@@ -2,12 +2,14 @@ import { supabase } from '../lib/supabase';
 import { fetchAll, insertRow, softDeleteRow, unwrap, updateRow, type BaseRow, type Fields } from './base';
 
 // Notes : type et requêtes repris de mobile-legacy/src/db/notesDb.ts.
-// Un titre, un corps en texte libre, épinglage facultatif.
+// Un titre, un corps en texte libre, épinglage et projet lié facultatifs.
 
 export type Note = BaseRow & {
   title: string;
   body: string;
   pinned: boolean;
+  /** projects.id (sans FK, migration 018), détaché à la suppression du projet. */
+  project_id: string | null;
 };
 
 /** Contenu éditable d'une note. */
@@ -23,6 +25,19 @@ export const listNotes = (): Promise<Note[]> =>
       .select('*')
       .is('deleted_at', null)
       .order('pinned', { ascending: false })
+      .order('updated_at', { ascending: false })
+      .order('id')
+      .range(from, to)
+  );
+
+/** Notes vivantes rattachées au projet, les plus récemment modifiées d'abord. */
+export const listProjectNotes = (projectId: string): Promise<Note[]> =>
+  fetchAll<Note>((from, to) =>
+    supabase
+      .from(NOTES)
+      .select('*')
+      .eq('project_id', projectId)
+      .is('deleted_at', null)
       .order('updated_at', { ascending: false })
       .order('id')
       .range(from, to)

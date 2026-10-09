@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { useConfirm } from '../components/Dialog';
 import { NoteRow } from '../components/NoteRow';
+import { ProjectSelect } from '../components/ProjectSelect';
 import { SearchField } from '../components/SearchField';
 import { CardList, CardNote, CategoryCard, ErrorBanner, GradientButton, Panel, ScreenHeader } from '../components/ui';
 import {
@@ -16,6 +17,7 @@ import {
   type Note,
   type NoteContent,
 } from '../data/notes';
+import { listProjects, type ProjectWithProgress } from '../data/projects';
 import { useRemoteQuery } from '../data/useRemoteQuery';
 import { useWrite } from '../data/useWrite';
 import { errorMessage } from '../lib/errors';
@@ -27,6 +29,7 @@ import { useToday } from '../lib/useToday';
 export const NEW_NOTE_ID = 'new';
 
 const NO_NOTES: Note[] = [];
+const NO_PROJECTS: ProjectWithProgress[] = [];
 
 /**
  * Notes : portage web de mobile-legacy/src/screens/NotesScreen.tsx et
@@ -40,6 +43,7 @@ export function NotesScreen() {
   const today = useToday();
   const [query, setQuery] = useState('');
   const { data: notes, error } = useRemoteQuery(listNotes, NO_NOTES);
+  const { data: projects } = useRemoteQuery(listProjects, NO_PROJECTS);
   const { run, error: writeError } = useWrite();
 
   // Les notes arrivent déjà triées (épinglées puis plus récentes).
@@ -106,6 +110,7 @@ export function NotesScreen() {
             key={editorKey}
             id={id}
             pinned={openNote?.pinned}
+            projects={projects}
             onCreated={(noteId) => navigate(`/notes/${noteId}`, { replace: true, state: { editorKey } })}
             onDeleted={() => navigate('/notes', { replace: true })}
           />
@@ -123,10 +128,10 @@ export function NotesScreen() {
 // pas de bouton « Enregistrer », et pas une requête par caractère.
 const SAVE_DEBOUNCE_MS = 700;
 
-const EMPTY: NoteContent = { title: '', body: '', pinned: false };
-const isEmpty = (c: NoteContent) => !c.title.trim() && !c.body.trim() && !c.pinned;
+const EMPTY: NoteContent = { title: '', body: '', pinned: false, project_id: null };
+const isEmpty = (c: NoteContent) => !c.title.trim() && !c.body.trim() && !c.pinned && !c.project_id;
 const sameContent = (a: NoteContent, b: NoteContent) =>
-  a.title === b.title && a.body === b.body && a.pinned === b.pinned;
+  a.title === b.title && a.body === b.body && a.pinned === b.pinned && a.project_id === b.project_id;
 
 /**
  * Copie locale de la saisie, effacée dès que Supabase a confirmé ce contenu :
@@ -141,6 +146,7 @@ function changes(from: NoteContent, to: NoteContent): Partial<NoteContent> {
   if (from.title !== to.title) patch.title = to.title;
   if (from.body !== to.body) patch.body = to.body;
   if (from.pinned !== to.pinned) patch.pinned = to.pinned;
+  if (from.project_id !== to.project_id) patch.project_id = to.project_id;
   return patch;
 }
 
@@ -152,12 +158,14 @@ function changes(from: NoteContent, to: NoteContent): Partial<NoteContent> {
 function NoteEditor({
   id,
   pinned,
+  projects,
   onCreated,
   onDeleted,
 }: {
   id: string;
   /** Épinglage tel que lu par la liste (bouton de la liste pendant l'édition). */
   pinned: boolean | undefined;
+  projects: ProjectWithProgress[];
   onCreated: (noteId: string) => void;
   onDeleted: () => void;
 }) {
@@ -203,12 +211,14 @@ function NoteEditor({
           setStatus('missing');
           return;
         }
-        const content = { title: note.title, body: note.body, pinned: note.pinned };
+        const content = { title: note.title, body: note.body, pinned: note.pinned, project_id: note.project_id };
         savedRef.current = content;
         confirmedRef.current = content;
         // Saisie restée non enregistrée lors d'une ouverture précédente : elle est
-        // reprise, et sera enregistrée au prochain délai de sauvegarde.
-        const local = readStored<NoteContent>(draftKey(noteId));
+        // reprise, et sera enregistrée au prochain délai de sauvegarde. Une copie
+        // antérieure au lien projet n'a pas de project_id : on garde celui lu.
+        const stored = readStored<Partial<NoteContent>>(draftKey(noteId));
+        const local = stored && { ...content, ...stored };
         const pending = local && !sameContent(local, content) ? local : null;
         if (!pending) removeStored(draftKey(noteId));
         draftRef.current = pending ?? content;
@@ -360,6 +370,18 @@ function NoteEditor({
           >
             <Trash2 size={18} />
           </button>
+        </div>
+        <div className="note-editor__project">
+          <label className="note-editor__project-label" htmlFor="note-project">
+            Projet lié
+          </label>
+          <ProjectSelect
+            id="note-project"
+            projects={projects.filter((p) => p.status !== 'terminé' || p.id === draft.project_id)}
+            value={draft.project_id}
+            onChange={(project_id) => update({ project_id }, true)}
+            disabled={status !== 'ready'}
+          />
         </div>
         <input
           className="note-editor__title"
