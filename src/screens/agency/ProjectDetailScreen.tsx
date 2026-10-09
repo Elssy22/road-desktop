@@ -16,6 +16,7 @@ import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Dialog, useConfirm } from '../../components/Dialog';
+import { LinkedDocumentsCard } from '../../components/LinkedDocumentsCard';
 import { QuickAddTask } from '../../components/QuickAddTask';
 import {
   Badge,
@@ -64,7 +65,7 @@ const NO_QONTO: QontoItem[] = [];
 const STATUS_OPTIONS = PROJECT_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }));
 
 /** Fiche d'un projet : portage web de mobile-legacy/src/screens/agency/ProjectDetailScreen.tsx. */
-export function ProjectDetailScreen() {
+export function ProjectDetailScreen({ userId }: { userId: string }) {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const today = useToday();
@@ -289,6 +290,8 @@ export function ProjectDetailScreen() {
               </CardNote>
             )}
           </CategoryCard>
+
+          <LinkedDocumentsCard userId={userId} kind="project" id={project.id} />
         </div>
       </div>
       {linking && (

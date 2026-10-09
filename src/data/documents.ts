@@ -46,6 +46,20 @@ export async function listDocuments(): Promise<DocumentWithLinks[]> {
   return withLinks(rows);
 }
 
+/** Documents liés à un contact ou à un projet, plus récents d'abord (fiches contact et projet). */
+export async function listLinkedDocuments(kind: 'contact' | 'project', id: string): Promise<VaultDocument[]> {
+  return fetchAll<VaultDocument>((from, to) =>
+    supabase
+      .from(DOCUMENTS)
+      .select('*')
+      .eq(kind === 'contact' ? 'contact_id' : 'project_id', id)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .order('id')
+      .range(from, to)
+  );
+}
+
 /** Document vivant avec ses liens, ou null s'il n'existe pas ou a été supprimé. */
 export async function getDocument(id: string): Promise<DocumentWithLinks | null> {
   const doc = unwrap(

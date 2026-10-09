@@ -74,11 +74,11 @@ function Root() {
           <Route path="/agency/contacts" element={<ContactsScreen />} />
           <Route path="/agency/contacts/new" element={<ContactFormScreen />} />
           <Route path="/agency/contacts/import" element={<ContactImportScreen userId={session.user.id} />} />
-          <Route path="/agency/contacts/:id" element={<ContactDetailScreen />} />
+          <Route path="/agency/contacts/:id" element={<ContactDetailScreen userId={session.user.id} />} />
           <Route path="/agency/contacts/:id/edit" element={<ContactFormScreen />} />
           <Route path="/agency/pipeline" element={<PipelineScreen />} />
           <Route path="/agency/projects" element={<ProjectsScreen />} />
-          <Route path="/agency/projects/:id" element={<ProjectDetailScreen />} />
+          <Route path="/agency/projects/:id" element={<ProjectDetailScreen userId={session.user.id} />} />
           <Route path="/agency/goals" element={<GoalsScreen userId={session.user.id} />} />
           <Route path="/agency/goals/new" element={<GoalFormScreen userId={session.user.id} />} />
           <Route path="/agency/goals/:id" element={<GoalFormScreen userId={session.user.id} />} />

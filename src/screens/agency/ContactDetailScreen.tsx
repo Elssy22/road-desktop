@@ -24,6 +24,7 @@ import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useConfirm } from '../../components/Dialog';
+import { LinkedDocumentsCard } from '../../components/LinkedDocumentsCard';
 import { askMarkAsActiveClient, STAGE_ICONS, StageSelect } from '../../components/PipelineStage';
 import { ReminderRow } from '../../components/ReminderRow';
 import {
@@ -81,7 +82,7 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
 };
 
 /** Fiche d'un contact : portage web de mobile-legacy/src/screens/agency/ContactDetailScreen.tsx. */
-export function ContactDetailScreen() {
+export function ContactDetailScreen({ userId }: { userId: string }) {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const today = useToday();
@@ -288,6 +289,8 @@ export function ContactDetailScreen() {
               <CardNote>Aucun rappel prévu.</CardNote>
             )}
           </CategoryCard>
+
+          <LinkedDocumentsCard userId={userId} kind="contact" id={contact.id} />
         </div>
       </div>
       {dialog}
