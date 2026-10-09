@@ -1,6 +1,6 @@
 import { FileLock, FilePlus, Lock, LockOpen } from 'lucide-react';
 import { useCallback, useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
   CardList,
@@ -40,34 +40,50 @@ const STEP_LABELS: Record<Step, string> = {
 
 const loadLists = async (): Promise<Lists> => {
   const [documents, contacts, projects] = await Promise.all([listDocuments(), listContacts(), listProjects()]);
-  return { documents, contacts, projects: projects.filter((p) => p.status !== 'terminé') };
+  return { documents, contacts, projects };
 };
 
 /**
  * Coffre : portage web de mobile-legacy/src/screens/agency/VaultScreen.tsx.
  * Liste des documents (titres en clair) et ajout d'un fichier, chiffré sur ce
  * Mac avant envoi : le serveur ne reçoit que des octets illisibles.
+ * `?contact=<id>` ou `?project=<id>` (bouton « Ajouter » des fiches contact et
+ * projet) : le document est lié d'office, puis retour à la fiche après l'envoi.
  */
 export function VaultScreen({ userId }: { userId: string }) {
   const navigate = useNavigate();
   const today = useToday();
+  const [params] = useSearchParams();
+  const presetContact = params.get('contact');
+  const presetProject = params.get('project');
+  const preset = presetContact || presetProject;
   const { data, error: loadError, loading } = useRemoteQuery(loadLists, EMPTY);
+  // Un projet terminé reste proposé s'il est celui de la fiche d'où l'on vient.
+  const projects = data.projects.filter((p) => p.status !== 'terminé' || p.id === presetProject);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [step, setStep] = useState<Step | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const { unlocked, markUnlocked, lock } = useVaultLock(userId, () => setDraft(null));
 
-  const onPicked = useCallback((file: File | undefined) => {
-    setError(null);
-    if (!file) return;
-    const problem = checkFileSize(file.size);
-    if (problem) {
-      setError(problem);
-      return;
-    }
-    setDraft({ file, title: file.name.replace(/\.[^.]+$/, ''), contact_id: null, project_id: null });
-  }, []);
+  const onPicked = useCallback(
+    (file: File | undefined) => {
+      setError(null);
+      if (!file) return;
+      const problem = checkFileSize(file.size);
+      if (problem) {
+        setError(problem);
+        return;
+      }
+      setDraft({
+        file,
+        title: file.name.replace(/\.[^.]+$/, ''),
+        contact_id: presetContact,
+        project_id: presetProject,
+      });
+    },
+    [presetContact, presetProject]
+  );
 
   const send = async (e: FormEvent) => {
     e.preventDefault();
@@ -91,6 +107,7 @@ export function VaultScreen({ userId }: { userId: string }) {
         project_id: draft.project_id,
       });
       setDraft(null);
+      if (preset) navigate(-1);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -165,7 +182,7 @@ export function VaultScreen({ userId }: { userId: string }) {
                       onChange={(e) => setDraft((d) => d && { ...d, project_id: e.target.value || null })}
                     >
                       <option value="">Aucun</option>
-                      {data.projects.map((p) => (
+                      {projects.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.title || 'Sans titre'}
                         </option>
@@ -188,6 +205,27 @@ export function VaultScreen({ userId }: { userId: string }) {
               </form>
             </CategoryCard>
           )
+        )}
+
+        {/* Venu d'une fiche contact ou projet : lien déjà choisi, il ne reste que le fichier. */}
+        {unlocked && !draft && preset && (
+          <CategoryCard category="reminders" icon={FilePlus} title="Nouveau document">
+            <CardNote>
+              Sera lié à{' '}
+              {presetContact
+                ? (data.contacts.find((c) => c.id === presetContact)?.name ?? 'ce contact')
+                : (projects.find((p) => p.id === presetProject)?.title ?? 'ce projet')}
+              .
+            </CardNote>
+            <div className="form-actions form-actions--start">
+              <button type="button" className="button button--primary" onClick={() => fileInput.current?.click()}>
+                Choisir un fichier
+              </button>
+              <button type="button" className="button button--ghost" onClick={() => navigate(-1)}>
+                Retour à la fiche
+              </button>
+            </div>
+          </CategoryCard>
         )}
 
         <ErrorBanner message={error} />
