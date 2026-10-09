@@ -574,6 +574,12 @@ button {
   border-radius: var(--radius-pill);
 }
 
+.badge-group {
+  flex: none;
+  display: flex;
+  gap: var(--space-xs);
+}
+
 /* --- Lignes de liste --- */
 
 .row {

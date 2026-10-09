@@ -1,3 +1,4 @@
+import { occurrencesBetween, type Recurrence } from '../lib/keyDateRecurrence';
 import { supabase } from '../lib/supabase';
 import { fetchAll, insertRow, softDeleteRow, unwrap, updateRow, type BaseRow, type Fields } from './base';
 import { contactNames } from './crm';
@@ -13,13 +14,18 @@ export type KeyDate = BaseRow & {
   category: string;
   contact_id: string | null;
   notes: string | null;
+  /** Null = ponctuelle ; sinon `date` est la première échéance (lib/keyDateRecurrence.ts). */
+  recurrence: Recurrence | null;
+  /** Jour du mois (1-31) des séries mensuelles et trimestrielles. */
+  recurrence_day: number | null;
 };
 
-export const KEY_DATE_CATEGORIES = ['fin_contrat', 'licence', 'autre'] as const;
+export const KEY_DATE_CATEGORIES = ['fin_contrat', 'licence', 'admin', 'autre'] as const;
 
 export const CATEGORY_LABELS: Record<string, string> = {
   fin_contrat: 'Fin de contrat client',
   licence: 'Licence',
+  admin: 'Fiscal / URSSAF',
   autre: 'Autre',
 };
 
@@ -34,7 +40,10 @@ async function withContacts(rows: KeyDate[]): Promise<KeyDateWithContact[]> {
   return rows.map((r) => ({ ...r, contact_name: (r.contact_id && names.get(r.contact_id)) || null }));
 }
 
-/** Toutes les dates clés, de la plus proche à la plus lointaine. */
+/**
+ * Toutes les dates clés, de la plus proche à la plus lointaine, telles qu'en base :
+ * `date` est la première échéance des séries récurrentes (cf. atNextOccurrence).
+ */
 export async function listKeyDates(): Promise<KeyDateWithContact[]> {
   const rows = await fetchAll<KeyDate>((a, b) =>
     supabase
@@ -49,20 +58,42 @@ export async function listKeyDates(): Promise<KeyDateWithContact[]> {
   return withContacts(rows);
 }
 
-/** Dates clés comprises entre `from` et `to` inclus (YYYY-MM-DD). */
+/**
+ * Dates clés comprises entre `from` et `to` inclus (YYYY-MM-DD). Une série récurrente
+ * donne une ligne par occurrence de la période, `date` remplacée par l'occurrence
+ * (même `id` : deux lignes possibles sur une période de plus d'un mois).
+ */
 export async function listKeyDatesBetween(from: string, to: string): Promise<KeyDateWithContact[]> {
-  const rows = await fetchAll<KeyDate>((a, b) =>
-    supabase
-      .from(KEY_DATES)
-      .select('*')
-      .is('deleted_at', null)
-      .gte('date', from)
-      .lte('date', to)
-      .order('date')
-      .order('created_at')
-      .order('id')
-      .range(a, b)
-  );
+  const [oneOff, series] = await Promise.all([
+    fetchAll<KeyDate>((a, b) =>
+      supabase
+        .from(KEY_DATES)
+        .select('*')
+        .is('deleted_at', null)
+        .is('recurrence', null)
+        .gte('date', from)
+        .lte('date', to)
+        .order('date')
+        .order('created_at')
+        .order('id')
+        .range(a, b)
+    ),
+    // Peu nombreuses : toutes celles déjà commencées, dépliées sur la période.
+    fetchAll<KeyDate>((a, b) =>
+      supabase
+        .from(KEY_DATES)
+        .select('*')
+        .is('deleted_at', null)
+        .not('recurrence', 'is', null)
+        .lte('date', to)
+        .order('created_at')
+        .order('id')
+        .range(a, b)
+    ),
+  ]);
+  const occurrences = series.flatMap((k) => occurrencesBetween(k, from, to).map((date) => ({ ...k, date })));
+  // Tri stable : à date égale, les ponctuelles puis les séries, chacune par création.
+  const rows = [...oneOff, ...occurrences].sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0));
   return withContacts(rows);
 }
 

@@ -14,6 +14,7 @@ import {
 } from '../../components/ui';
 import { listKeyDates, type KeyDateWithContact } from '../../data/keyDates';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
+import { atNextOccurrence } from '../../lib/keyDateRecurrence';
 import { useToday } from '../../lib/useToday';
 
 const EMPTY: KeyDateWithContact[] = [];
@@ -28,13 +29,14 @@ export function KeyDatesScreen() {
   const [filter, setFilter] = useState<Filter>('upcoming');
 
   // À venir : de la plus proche à la plus lointaine ; passées : la plus récente d'abord.
-  const { upcoming, past } = useMemo(
-    () => ({
-      upcoming: all.filter((k) => k.date >= today),
-      past: all.filter((k) => k.date < today).reverse(),
-    }),
-    [all, today]
-  );
+  // Une série récurrente affiche sa prochaine occurrence : jamais « passée » (§39).
+  const { upcoming, past } = useMemo(() => {
+    const dated = atNextOccurrence(all, today);
+    return {
+      upcoming: dated.filter((k) => k.date >= today),
+      past: dated.filter((k) => k.date < today).reverse(),
+    };
+  }, [all, today]);
   const visible = filter === 'upcoming' ? upcoming : past;
 
   return (

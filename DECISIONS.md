@@ -1916,3 +1916,34 @@ de commande avec `xcodebuild`, donc indépendant de notre configuration). Xcode 
   en 5xx indéfiniment est traité comme passager (se reconnecter n'y changerait rien) ; la
   détection n'intervient qu'à la prochaine lecture refusée (focus, écriture, retour réseau),
   jusqu'à environ 65 s plus tard si auth-js resert encore un échec réseau en cache.
+
+## 39. Échéances clés récurrentes (fiscal / URSSAF)
+
+- Besoin : des rappels pour les obligations récurrentes (déclaration URSSAF, TVA, CFE…).
+  Les échéances exactes dépendent du statut juridique de Landry (micro-entreprise ou
+  société, à confirmer) : fonctionnalité **générique**, aucune échéance officielle codée.
+  Les Échéances clés sont étendues plutôt qu'un système séparé.
+- Schéma (app-repo `019_key_dates_recurrence.sql`, additive) : `recurrence` (`monthly` |
+  `quarterly` | `yearly` | null = ponctuelle) et `recurrence_day` (1-31, séries mensuelles et
+  trimestrielles seulement). `date` reste la **première échéance** de la série.
+- Mécanisme : calcul côté client (`lib/keyDateRecurrence.ts`), sans écriture ni job planifié.
+  Les occurrences se déduisent de `date` mois après mois au jour `recurrence_day`, ramené au
+  dernier jour des mois plus courts (31 → 28/29/30, recalculé à chaque mois : pas de
+  dérive). Annuel : jour et mois de `date`. Jamais d'occurrence avant `date`. Écarté : le job
+  qui avance `date` en base (Edge Function + cron, écritures concurrentes avec le mobile
+  offline-first, historique perdu) et l'avance de `date` à l'ouverture de l'app (écriture
+  déclenchée par une lecture, plusieurs appareils).
+- Affichage : une série montre toujours sa **prochaine** occurrence (aujourd'hui inclus),
+  jamais « Passée » ; elle n'apparaît donc pas dans l'onglet Passées. La ligne porte un
+  badge « Récurrent » et « Tous les mois · le 15 » dans le sous-titre ; le compte à rebours
+  J-7/J-30/J-90 vaut pour l'occurrence affichée. `listKeyDatesBetween` (Vue du jour, Revue,
+  calendrier) déplie chaque série sur la période, une ligne par occurrence.
+- Formulaire : sélecteur Aucune / Mensuelle / Trimestrielle / Annuelle, « Première
+  échéance », jour du mois (vide = celui de la première échéance), aperçu « Prochaine : … ».
+  Catégorie `admin` « Fiscal / URSSAF » ajoutée aux pastilles (facultative, `category` reste
+  un texte libre), exemple dans le placeholder de l'intitulé.
+- Limites : rien ne marque une occurrence comme faite (elle disparaît le lendemain) ; pas de
+  fin de série (supprimer la date clé arrête la série) ; supprimer supprime toute la série ;
+  le mobile ne connaît pas la récurrence (non vérifié dans son code : il devrait afficher la
+  première échéance, passée, et la catégorie `admin` brute) ; migration à appliquer **avant** cette version (sinon lectures
+  et créations d'échéances en erreur).

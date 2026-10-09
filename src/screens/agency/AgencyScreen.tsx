@@ -27,6 +27,7 @@ import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { needsFollowUp } from '../../lib/followUp';
 import { PROSPECT_RETENTION_YEARS } from '../../lib/crmRetention';
 import { daysUntil, TODAY_ALERT_DAYS } from '../../lib/keyDateAlerts';
+import { atNextOccurrence } from '../../lib/keyDateRecurrence';
 import { formatMoney } from '../../lib/money';
 import { useToday } from '../../lib/useToday';
 import { isUrgent } from '../../lib/veille';
@@ -72,7 +73,7 @@ export function AgencyScreen({ userId }: { userId: string }) {
       (c) => c.pipeline_stage && c.pipeline_stage !== 'signe' && c.pipeline_stage !== 'perdu'
     );
     const potential = Math.round(open.reduce((sum, c) => sum + (c.pipeline_amount ?? 0), 0) * 100) / 100;
-    const upcoming = keyDates.filter((k) => k.date >= today);
+    const upcoming = atNextOccurrence(keyDates, today).filter((k) => k.date >= today);
     return {
       contacts: contacts.length,
       followUps: contacts.filter((c) => needsFollowUp(c, today)).length,
@@ -155,7 +156,7 @@ export function AgencyScreen({ userId }: { userId: string }) {
       category: 'keyDates',
       icon: Hourglass,
       title: 'Échéancier',
-      subtitle: `${plural(summary.upcomingDates, 'échéance')} à venir · contrats clients`,
+      subtitle: `${plural(summary.upcomingDates, 'échéance')} à venir · contrats, échéances fiscales`,
       alert: summary.soonDates > 0 ? `${summary.soonDates} sous ${TODAY_ALERT_DAYS} j` : undefined,
     },
     {

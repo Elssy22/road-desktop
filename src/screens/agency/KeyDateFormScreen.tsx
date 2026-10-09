@@ -19,12 +19,36 @@ import {
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
 import { changedFields } from '../../data/base';
-import { formatDueLabel, type DateKey } from '../../lib/dates';
+import { formatDueLabel, fromDateKey, type DateKey } from '../../lib/dates';
+import {
+  nextOccurrence,
+  RECURRENCE_LABELS,
+  RECURRENCES,
+  usesRecurrenceDay,
+  type Recurrence,
+} from '../../lib/keyDateRecurrence';
 import { useFormExit } from '../../lib/useFormExit';
 import { useToday } from '../../lib/useToday';
 
-type Form = { title: string; date: DateKey | null; category: string; contact_id: string | null; notes: string };
-const EMPTY_FORM: Form = { title: '', date: null, category: 'fin_contrat', contact_id: null, notes: '' };
+type Form = {
+  title: string;
+  date: DateKey | null;
+  category: string;
+  contact_id: string | null;
+  notes: string;
+  recurrence: Recurrence | null;
+  /** Saisie brute du jour du mois ; vide = jour de la première échéance. */
+  recurrence_day: string;
+};
+const EMPTY_FORM: Form = {
+  title: '',
+  date: null,
+  category: 'fin_contrat',
+  contact_id: null,
+  notes: '',
+  recurrence: null,
+  recurrence_day: '',
+};
 const NO_CONTACTS: ContactWithLast[] = [];
 
 const toForm = (k: KeyDate): Form => ({
@@ -33,7 +57,25 @@ const toForm = (k: KeyDate): Form => ({
   category: k.category,
   contact_id: k.contact_id,
   notes: k.notes ?? '',
+  recurrence: k.recurrence,
+  recurrence_day: k.recurrence_day ? String(k.recurrence_day) : '',
 });
+
+/** Jour du mois saisi, ou null si la saisie est vide ou hors de 1-31. */
+function typedDay(form: Form): number | null {
+  const n = Number(form.recurrence_day);
+  return form.recurrence_day.trim() && Number.isInteger(n) && n >= 1 && n <= 31 ? n : null;
+}
+
+/** Jour du mois enregistré : la saisie, sinon celui de la première échéance. */
+function recurrenceDay(form: Form): number | null {
+  if (!usesRecurrenceDay(form.recurrence)) return null;
+  return typedDay(form) ?? (form.date ? fromDateKey(form.date).getDate() : null);
+}
+
+/** Saisie du jour du mois invalide (vide est permis). */
+const badRecurrenceDay = (form: Form) =>
+  usesRecurrenceDay(form.recurrence) && form.recurrence_day.trim() !== '' && typedDay(form) == null;
 
 /**
  * Création (`/agency/key-dates/new`) ou modification (`/agency/key-dates/:id`)
@@ -78,7 +120,14 @@ function KeyDateForm({ id }: { id?: string }) {
   }, [id]);
 
   const patch = (p: Partial<Form>) => setForm((f) => ({ ...f, ...p }));
-  const canSave = form.title.trim().length > 0 && form.date != null && !loading && !saving && (!id || !!keyDate);
+  const dayError = badRecurrenceDay(form) ? 'Un jour entre 1 et 31.' : null;
+  const canSave =
+    form.title.trim().length > 0 && form.date != null && !dayError && !loading && !saving && (!id || !!keyDate);
+  // Aperçu : la prochaine échéance d'une série, telle que l'échéancier l'affichera.
+  const shownDate =
+    form.date && form.recurrence
+      ? nextOccurrence({ date: form.date, recurrence: form.recurrence, recurrence_day: recurrenceDay(form) }, today)
+      : form.date;
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
@@ -89,6 +138,8 @@ function KeyDateForm({ id }: { id?: string }) {
       category: form.category,
       contact_id: form.contact_id,
       notes: form.notes.trim() || null,
+      recurrence: form.recurrence,
+      recurrence_day: recurrenceDay(form),
     };
     setSaving(true);
     const ok = await run(async () => {
@@ -129,12 +180,25 @@ function KeyDateForm({ id }: { id?: string }) {
                   className="input"
                   value={form.title}
                   onChange={(e) => patch({ title: e.target.value })}
-                  placeholder="Ex. Fin de contrat de X avec Y"
+                  placeholder="Ex. Fin de contrat de X avec Y, déclaration URSSAF…"
                   autoFocus={!id}
                   disabled={loading}
                 />
               </FormField>
-              <FormField label="Date *" htmlFor="key-date-date">
+              <FormField label="Récurrence">
+                <ChipRow>
+                  <Chip label="Aucune" selected={!form.recurrence} onClick={() => patch({ recurrence: null })} />
+                  {RECURRENCES.map((r) => (
+                    <Chip
+                      key={r}
+                      label={RECURRENCE_LABELS[r]}
+                      selected={form.recurrence === r}
+                      onClick={() => patch({ recurrence: r })}
+                    />
+                  ))}
+                </ChipRow>
+              </FormField>
+              <FormField label={form.recurrence ? 'Première échéance *' : 'Date *'} htmlFor="key-date-date">
                 <span className="inline-field">
                   <input
                     id="key-date-date"
@@ -144,9 +208,32 @@ function KeyDateForm({ id }: { id?: string }) {
                     value={form.date ?? ''}
                     onChange={(e) => patch({ date: e.target.value || null })}
                   />
-                  {form.date && <span className="row__meta-item">{formatDueLabel(form.date, today)}</span>}
+                  {shownDate && (
+                    <span className="row__meta-item">
+                      {form.recurrence ? 'Prochaine : ' : ''}
+                      {formatDueLabel(shownDate, today)}
+                    </span>
+                  )}
                 </span>
               </FormField>
+              {usesRecurrenceDay(form.recurrence) && (
+                <FormField label="Jour du mois" htmlFor="key-date-day" error={dayError}>
+                  <input
+                    id="key-date-day"
+                    className="input input--compact"
+                    type="number"
+                    min={1}
+                    max={31}
+                    value={form.recurrence_day}
+                    onChange={(e) => patch({ recurrence_day: e.target.value })}
+                    placeholder={form.date ? String(fromDateKey(form.date).getDate()) : '15'}
+                  />
+                  <span className="form-field__hint">
+                    {form.recurrence === 'quarterly' ? 'Tous les 3 mois à partir de la première échéance. ' : ''}
+                    Vide : jour de la première échéance. Les jours 29 à 31 passent au dernier jour des mois plus courts.
+                  </span>
+                </FormField>
+              )}
               <FormField label="Catégorie">
                 <ChipRow>
                   {KEY_DATE_CATEGORIES.map((c) => (
