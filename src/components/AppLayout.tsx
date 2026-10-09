@@ -6,6 +6,7 @@ import {
   ListChecks,
   Lock,
   LogOut,
+  MailCheck,
   NotebookPen,
   Search,
   Settings,
@@ -21,6 +22,8 @@ import { matchPath, NavLink, Outlet, useLocation, useNavigate, useSearchParams }
 
 import { useSession } from '../auth/SessionProvider';
 import { useSignOut } from '../auth/useSignOut';
+import { countPendingSuggestions } from '../data/mailSuggestions';
+import { useRemoteQuery } from '../data/useRemoteQuery';
 import { ErrorBoundary } from './ErrorBoundary';
 import { SearchField } from './SearchField';
 
@@ -53,8 +56,15 @@ export const SECTIONS: Section[] = [
     ],
   },
   { path: '/notes', label: 'Notes', icon: NotebookPen },
+  // Desktop seulement : suggestions de la boîte mail à valider.
+  { path: '/suggestions', label: 'Suggestions', icon: MailCheck },
   { path: '/settings', label: 'Réglages', icon: Settings },
 ];
+
+/** Badge « suggestions en attente » ; 0 (rien d'affiché) si la lecture échoue. */
+function usePendingSuggestions(): number {
+  return useRemoteQuery(countPendingSuggestions, 0).data;
+}
 
 /**
  * Recherche globale (SearchScreen du mobile) : sur desktop, un champ toujours
@@ -100,6 +110,7 @@ export function AppLayout() {
   const { session } = useSession();
   const { pathname } = useLocation();
   const { signOut, busy, error: signOutError } = useSignOut();
+  const badges: Record<string, number> = { '/suggestions': usePendingSuggestions() };
 
   return (
     <div className="shell">
@@ -121,6 +132,11 @@ export function AppLayout() {
                 >
                   <Icon size={18} />
                   {label}
+                  {badges[path] ? (
+                    <span className="nav-link__badge" aria-label={`${badges[path]} en attente`}>
+                      {badges[path]}
+                    </span>
+                  ) : null}
                 </NavLink>
                 {children && (
                   <ul className="sidebar__list sidebar__sublist">

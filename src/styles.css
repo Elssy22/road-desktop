@@ -2105,3 +2105,17 @@ button {
   align-items: center;
   gap: var(--space-xs);
 }
+
+/* Compteur d'une entrée de la barre latérale (suggestions en attente). */
+.nav-link__badge {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-radius: var(--radius-pill);
+}
