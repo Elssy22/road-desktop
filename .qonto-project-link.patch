@@ -1,0 +1,57 @@
+diff --git a/src/screens/agency/ProjectDetailScreen.tsx b/src/screens/agency/ProjectDetailScreen.tsx
+--- a/src/screens/agency/ProjectDetailScreen.tsx
++++ b/src/screens/agency/ProjectDetailScreen.tsx
+@@ -10,2 +10,3 @@ import {
+   NotebookPen,
++  Receipt,
+   Trash2,
+@@ -52,3 +53,5 @@ import { useRemoteQuery } from '../../data/useRemoteQuery';
+ import { useWrite } from '../../data/useWrite';
+-import { formatDueLabel, formatEditedLabel } from '../../lib/dates';
++import { formatDueLabel, formatEditedLabel, type DateKey } from '../../lib/dates';
++import { formatMoney } from '../../lib/money';
++import { fetchProjectQontoItems, qontoStatusLabel, type QontoItem } from '../../lib/qonto';
+ import { useToday } from '../../lib/useToday';
+@@ -58,2 +61,3 @@ const EMPTY: Detail = { project: null, steps: [], tasks: [], notes: [] };
+ const NO_TASKS: Task[] = [];
++const NO_QONTO: QontoItem[] = [];
+
+@@ -81,2 +85,5 @@ export function ProjectDetailScreen() {
+   const { project, steps, tasks, notes } = data;
++  // Lecture à part : une erreur Qonto (migration 020 absente…) ne masque pas la fiche.
++  const loadBilling = useCallback(() => fetchProjectQontoItems(id), [id]);
++  const { data: billing, error: billingError } = useRemoteQuery(loadBilling, NO_QONTO);
+
+@@ -263,2 +270,23 @@ export function ProjectDetailScreen() {
+           </CategoryCard>
++
++          <CategoryCard category="finance" icon={Receipt} title="Facturation" count={billing.length}>
++            {billingError ? (
++              <CardNote tone="danger">Factures Qonto illisibles pour l’instant : {billingError}</CardNote>
++            ) : billing.length > 0 ? (
++              <CardList>
++                {billing.map((item) => (
++                  <ListRow
++                    key={item.id}
++                    title={item.label || 'Sans libellé'}
++                    subtitle={billingSubtitle(item, today)}
++                    right={<span className="row__amount">{formatMoney(item.amount, item.currency)}</span>}
++                  />
++                ))}
++              </CardList>
++            ) : (
++              <CardNote>
++                Aucune facture ni devis Qonto lié. Choisis ce projet dans « Projet lié » depuis Finances › Depuis Qonto.
++              </CardNote>
++            )}
++          </CategoryCard>
+         </div>
+@@ -279,2 +307,8 @@ export function ProjectDetailScreen() {
+
++/** « Facture · Impayée · Échéance 12 oct. » ; « Expire » pour un devis. */
++function billingSubtitle(item: QontoItem, today: DateKey): string {
++  const due = item.due_date && `${item.kind === 'quote' ? 'Expire' : 'Échéance'} ${formatDueLabel(item.due_date, today)}`;
++  return [qontoStatusLabel(item, today), due].filter(Boolean).join(' · ');
++}
++
+ /** Titre et description, enregistrés à la perte de focus. */

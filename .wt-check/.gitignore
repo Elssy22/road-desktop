@@ -1,0 +1,44 @@
+# dependencies
+node_modules/
+
+# Vite (frontend web)
+dist/
+dist-ssr/
+
+# Tauri / Cargo (src-tauri/.gitignore couvre aussi target/ et gen/schemas)
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Expo (restes de l'app mobile, cf. mobile-legacy/)
+.expo/
+web-build/
+expo-env.d.ts
+
+# Signing keys
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# logs / debug
+*.log
+npm-debug.*
+
+# macOS
+.DS_Store
+
+# local env files (VITE_SUPABASE_* : cf. .env.example)
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# outils locaux
+claude_*.json
