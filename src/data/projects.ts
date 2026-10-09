@@ -1,3 +1,4 @@
+import { detachQontoItemsFromProject } from '../lib/qonto';
 import { supabase } from '../lib/supabase';
 import {
   fetchAll,
@@ -200,9 +201,10 @@ const DETACHED_ON_DELETE = ['money_items', 'documents', 'appointments', 'goals',
 
 /**
  * Supprime le projet et ses étapes ; les tâches, objectifs, lignes financières,
- * documents, rendez-vous et notes rattachés sont conservés mais détachés. Pas de
- * transaction via PostgREST : le projet est supprimé en dernier, une erreur en
- * route laisse donc la fiche visible et la suppression peut être relancée.
+ * documents, rendez-vous, notes et factures/devis Qonto rattachés sont conservés
+ * mais détachés. Pas de transaction via PostgREST : le projet est supprimé en
+ * dernier, une erreur en route laisse donc la fiche visible et la suppression
+ * peut être relancée.
  */
 export async function softDeleteProject(projectId: string) {
   const ts = new Date().toISOString();
@@ -223,6 +225,8 @@ export async function softDeleteProject(projectId: string) {
           .is('deleted_at', null)
       );
     }
+    // qonto_items : ni deleted_at ni updated_at écrivables par l'app, seul project_id l'est.
+    await detachQontoItemsFromProject(projectId);
     unwrap(await supabase.from(PROJECTS).update({ deleted_at: ts, updated_at: ts }).eq('id', projectId));
   } finally {
     notifyDataChanged();

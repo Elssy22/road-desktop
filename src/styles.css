@@ -1733,6 +1733,25 @@ button {
   color: var(--color-success);
 }
 
+/* « Projet lié » d'une facture ou d'un devis Qonto, sous les dates. */
+.qonto-row__project {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.qonto-row__project-label {
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.qonto-row__project .select {
+  padding: 2px var(--space-sm);
+  font-size: 12px;
+}
+
 /* Compte rendu d'import sur plusieurs lignes (une erreur par type). */
 .card .notice {
   white-space: pre-line;

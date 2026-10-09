@@ -1,7 +1,9 @@
 // Import Qonto (lecture seule). L'app n'appelle jamais l'API Qonto : elle déclenche
 // l'Edge Function `qonto-sync` puis relit la table qonto_items (cf. DECISIONS.md §14).
+// Seule écriture de l'app : le projet lié (project_id, migration 020), choisi à la main.
 import { FunctionsHttpError } from '@supabase/supabase-js';
 
+import { notifyDataChanged, unwrap } from '../data/base';
 import type { DateKey } from './dates';
 import { supabase } from './supabase';
 
@@ -17,6 +19,8 @@ export type QontoItem = {
   status: string;
   qonto_date: string | null;
   due_date: string | null;
+  /** projects.id (sans FK, migration 020) : lien manuel, jamais déduit automatiquement. */
+  project_id: string | null;
 };
 
 export type QontoSyncResult = {
@@ -62,6 +66,18 @@ const groupStatus = (item: QontoItem, today: DateKey) =>
     ? 'late'
     : item.status;
 
+const STATUS_LABELS: Partial<Record<QontoKind, Record<string, string>>> = {
+  client_invoice: { late: 'En retard', unpaid: 'Impayée', draft: 'Brouillon', paid: 'Payée', canceled: 'Annulée' },
+  quote: { pending_approval: 'En attente', approved: 'Accepté', canceled: 'Annulé' },
+};
+
+/** « Facture · Impayée », « Devis · Accepté » ; statut Qonto brut s'il est inconnu de l'app. */
+export function qontoStatusLabel(item: QontoItem, today: DateKey): string {
+  const status = groupStatus(item, today);
+  const kind = item.kind === 'quote' ? 'Devis' : item.kind === 'client_invoice' ? 'Facture' : 'Transaction';
+  return `${kind} · ${STATUS_LABELS[item.kind]?.[status] ?? status}`;
+}
+
 export function groupQontoItems(items: QontoItem[], today: DateKey): QontoGroup[] {
   const byKey = new Map<string, QontoItem[]>();
   for (const item of items) {
@@ -79,17 +95,58 @@ export function groupQontoItems(items: QontoItem[], today: DateKey): QontoGroup[
   return [...known, ...extra].filter((g) => byKey.has(g.key)).map((g) => ({ ...g, data: byKey.get(g.key)! }));
 }
 
+const ITEM_COLUMNS = 'id, qonto_id, kind, label, amount, currency, status, qonto_date, due_date, project_id';
+
+// numeric arrive en chaîne ou en nombre selon la précision : on normalise.
+const toItem = (r: Record<string, unknown>) => ({ ...r, amount: Number(r.amount) }) as QontoItem;
+
+/** Factures clients et devis : seules lignes Qonto qu'on peut lier à un projet. */
+export const isProjectLinkable = (item: QontoItem) => item.kind === 'client_invoice' || item.kind === 'quote';
+
 /** Lignes importées, les plus récentes d'abord. Nécessite le réseau. */
 export async function fetchQontoItems(userId: string): Promise<QontoItem[]> {
   const { data, error } = await supabase
     .from('qonto_items')
-    .select('id, qonto_id, kind, label, amount, currency, status, qonto_date, due_date')
+    .select(ITEM_COLUMNS)
     .eq('user_id', userId)
     .order('qonto_date', { ascending: false, nullsFirst: false })
     .limit(FETCH_LIMIT);
   if (error) throw new Error(error.message);
-  // numeric arrive en chaîne ou en nombre selon la précision : on normalise.
-  return (data ?? []).map((r) => ({ ...r, amount: Number(r.amount) }) as QontoItem);
+  return (data ?? []).map(toItem);
+}
+
+/** Factures et devis liés au projet, les plus récents d'abord. Nécessite le réseau. */
+export async function fetchProjectQontoItems(projectId: string): Promise<QontoItem[]> {
+  const { data, error } = await supabase
+    .from('qonto_items')
+    .select(ITEM_COLUMNS)
+    .eq('project_id', projectId)
+    .in('kind', ['client_invoice', 'quote'])
+    .order('qonto_date', { ascending: false, nullsFirst: false })
+    .order('id');
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(toItem);
+}
+
+/**
+ * Lie une facture ou un devis à un projet (null : détache). project_id est la
+ * seule colonne de qonto_items que l'app peut écrire (droit de colonne + RLS,
+ * migration 020) ; la synchro ne l'envoie pas, donc ne l'écrase pas.
+ */
+export async function setQontoItemProject(itemId: string, projectId: string | null) {
+  try {
+    const rows = unwrap(
+      await supabase.from('qonto_items').update({ project_id: projectId }).eq('id', itemId).select('id')
+    );
+    if (rows.length === 0) throw new Error('Ligne Qonto introuvable ou non modifiable (migration 020 appliquée ?).');
+  } finally {
+    notifyDataChanged();
+  }
+}
+
+/** Détache toutes les lignes Qonto d'un projet (suppression du projet). */
+export async function detachQontoItemsFromProject(projectId: string) {
+  unwrap(await supabase.from('qonto_items').update({ project_id: null }).eq('project_id', projectId));
 }
 
 /** Encaissement Qonto compté dans le CA : transaction effectuée, créditrice, en euros. */

@@ -2,7 +2,7 @@ import type { Project } from '../data/projects';
 import { LinkSelect } from './LinkSelect';
 
 /**
- * Sélecteur « Projet lié » (notes). Un projet lié supprimé entre-temps
+ * Sélecteur « Projet lié » (notes, factures et devis Qonto). Un projet lié supprimé entre-temps
  * s'affiche « Projet supprimé » (cf. LinkSelect).
  */
 export function ProjectSelect({

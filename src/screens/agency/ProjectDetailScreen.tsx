@@ -8,6 +8,7 @@ import {
   ListChecks,
   ListTodo,
   NotebookPen,
+  Receipt,
   Trash2,
   Unlink,
 } from 'lucide-react';
@@ -50,12 +51,15 @@ import {
 import { setTaskDone, setTaskProject, type Task } from '../../data/tasks';
 import { useRemoteQuery } from '../../data/useRemoteQuery';
 import { useWrite } from '../../data/useWrite';
-import { formatDueLabel, formatEditedLabel } from '../../lib/dates';
+import { formatDueLabel, formatEditedLabel, type DateKey } from '../../lib/dates';
+import { formatMoney } from '../../lib/money';
+import { fetchProjectQontoItems, qontoStatusLabel, type QontoItem } from '../../lib/qonto';
 import { useToday } from '../../lib/useToday';
 
 type Detail = { project: Project | null; steps: ProjectStep[]; tasks: Task[]; notes: Note[] };
 const EMPTY: Detail = { project: null, steps: [], tasks: [], notes: [] };
 const NO_TASKS: Task[] = [];
+const NO_QONTO: QontoItem[] = [];
 
 const STATUS_OPTIONS = PROJECT_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }));
 
@@ -79,6 +83,9 @@ export function ProjectDetailScreen() {
   }, [id]);
   const { data, error, loading } = useRemoteQuery(load, EMPTY);
   const { project, steps, tasks, notes } = data;
+  // Lecture à part : une erreur Qonto (migration 020 absente…) ne masque pas la fiche.
+  const loadBilling = useCallback(() => fetchProjectQontoItems(id), [id]);
+  const { data: billing, error: billingError } = useRemoteQuery(loadBilling, NO_QONTO);
 
   // Premier chargement, ou fiche précédente encore affichée après un changement d'URL.
   if (loading || (project && project.id !== id)) {
@@ -261,6 +268,27 @@ export function ProjectDetailScreen() {
               <CardNote>Aucune note liée. Choisis ce projet dans « Projet lié » depuis l’éditeur d’une note.</CardNote>
             )}
           </CategoryCard>
+
+          <CategoryCard category="finance" icon={Receipt} title="Facturation" count={billing.length}>
+            {billingError ? (
+              <CardNote tone="danger">Factures Qonto illisibles pour l’instant : {billingError}</CardNote>
+            ) : billing.length > 0 ? (
+              <CardList>
+                {billing.map((item) => (
+                  <ListRow
+                    key={item.id}
+                    title={item.label || 'Sans libellé'}
+                    subtitle={billingSubtitle(item, today)}
+                    right={<span className="row__amount">{formatMoney(item.amount, item.currency)}</span>}
+                  />
+                ))}
+              </CardList>
+            ) : (
+              <CardNote>
+                Aucune facture ni devis Qonto lié. Choisis ce projet dans « Projet lié » depuis Finances › Depuis Qonto.
+              </CardNote>
+            )}
+          </CategoryCard>
         </div>
       </div>
       {linking && (
@@ -275,6 +303,12 @@ export function ProjectDetailScreen() {
       {dialog}
     </div>
   );
+}
+
+/** « Facture · Impayée · Échéance 12 oct. » ; « Expire » pour un devis. */
+function billingSubtitle(item: QontoItem, today: DateKey): string {
+  const due = item.due_date && `${item.kind === 'quote' ? 'Expire' : 'Échéance'} ${formatDueLabel(item.due_date, today)}`;
+  return [qontoStatusLabel(item, today), due].filter(Boolean).join(' · ');
 }
 
 /** Titre et description, enregistrés à la perte de focus. */
